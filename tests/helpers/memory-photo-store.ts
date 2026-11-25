@@ -18,8 +18,8 @@ export class MemoryPhotoStore implements PhotoStore {
     };
   }
 
-  async presignGet(key: string, opts: { expiresInSec: number }): Promise<string> {
-    return `memory://get/${key}?expires=${opts.expiresInSec}`;
+  async presignGet(key: string, opts: { expiresInSec: number; signingDate?: Date }): Promise<string> {
+    return `memory://get/${key}?expires=${opts.expiresInSec}${opts.signingDate ? `&date=${opts.signingDate.getTime()}` : ""}`;
   }
 
   async head(key: string) {

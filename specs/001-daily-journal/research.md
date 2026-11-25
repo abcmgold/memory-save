@@ -195,3 +195,10 @@ Rev 2 (2026-11-25): chuyển sang PostgreSQL và triển khai miễn phí trên 
   Lý do: ràng buộc kỹ thuật "chạy local dễ dàng" và cho phép kiểm thử end-to-end trước khi có tài khoản đám mây.
 - **R6 bổ sung**: trình duyệt không cho đặt header `Content-Length`; presigned PUT ký `content-length` nên trình
   duyệt tự gửi đúng kích thước file — client chỉ cần đặt `Content-Type`.
+
+- **R5 sửa đổi (2026-11-25, người dùng chọn) — ảnh lưu đệm được 1 giờ**: DTO trả thẳng link R2 đã ký (chỉ tạo sau khi
+  kiểm tra quyền xem bài), ký với `signingDate` = đầu giờ hiện tại nên link **giống hệt** trong cả giờ, hạn 1 giờ + 5
+  phút; R2 trả `Cache-Control: private, max-age=3600`. F5/quay lại trang hiện ảnh ngay từ cache, bỏ chặng `/api/photos`
+  (Vercel + Neon) cho mỗi ảnh. Đánh đổi: ảnh đã tải trên máy người bị thu hồi còn xem được ≤ 1 giờ; link lộ dùng được
+  ≤ ~1 giờ 5 phút. `/api/photos/:id/:variant` vẫn kiểm quyền mỗi lần và trả `no-store`. Bucket private không đi qua CDN
+  của Cloudflare (CDN chỉ áp dụng cho custom domain/public bucket).

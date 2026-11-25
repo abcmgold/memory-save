@@ -29,7 +29,7 @@ export const GET = route(async (req) => {
   const body = await getPhotoStore().get(p.key);
   if (!body) throw errors.notFound();
   return new Response(new Uint8Array(body), {
-    headers: { "Content-Type": p.type, "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" },
+    headers: { "Content-Type": p.type, "Cache-Control": "private, max-age=3600", "X-Content-Type-Options": "nosniff" },
   });
 });
 

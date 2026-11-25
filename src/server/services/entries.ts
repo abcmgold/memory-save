@@ -10,7 +10,8 @@ import { validateEntry } from "../domain/entry-rules";
 import { canEditEntry, canViewEntry } from "../domain/access";
 import { dateUpperBound, decodeCursor, encodeCursor, PAGE_SIZE } from "../domain/timeline";
 import { allPhotoKeys, getPhotoStore } from "../storage/photo-store";
-import { toPhotoRef } from "./photos";
+import { toPhotoRefs } from "./photos";
+import type { PhotoRef } from "@/lib/types";
 import { toUserRef } from "./auth";
 import { areFriends } from "./relations";
 import { applyAudience, loadAudiences } from "./audience";
@@ -264,12 +265,14 @@ async function toEntries(db: DbOrTx, viewerId: string, rows: EntryRowX[]): Promi
     .from(schema.photos)
     .where(and(inArray(schema.photos.entryId, ids), eq(schema.photos.status, "attached")))
     .orderBy(asc(schema.photos.position));
-  const photosByEntry = new Map<string, ReturnType<typeof toPhotoRef>[]>();
-  for (const p of photoRows) {
+  // Only entries the viewer may see reach this function, so signing direct image URLs here is safe.
+  const refs = await toPhotoRefs(photoRows);
+  const photosByEntry = new Map<string, PhotoRef[]>();
+  photoRows.forEach((p, i) => {
     const list = photosByEntry.get(p.entryId!) ?? [];
-    list.push(toPhotoRef(p));
+    list.push(refs[i]);
     photosByEntry.set(p.entryId!, list);
-  }
+  });
 
   const owned = rows.filter((r) => r.ownerId === viewerId);
   const audiences: Map<string, Audience> = owned.length

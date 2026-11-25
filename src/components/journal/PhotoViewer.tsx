@@ -33,7 +33,7 @@ export function PhotoViewer({ photos, alt }: { photos: PhotoRef[]; alt: string }
         <img
           src={current.displayUrl}
           alt={`${alt} — ảnh ${index + 1}`}
-          className="max-h-[70dvh] w-full object-cover"
+          className="max-h-[70dvh] w-full bg-[#ebe4d6] object-cover"
           style={{ aspectRatio: ratio }}
         />
         {photos.length > 1 && (
@@ -53,7 +53,7 @@ export function PhotoViewer({ photos, alt }: { photos: PhotoRef[]; alt: string }
               aria-current={i === index}
               className={`h-[68px] w-[68px] shrink-0 overflow-hidden rounded-xl border-ink ${i === index ? "border-[2.5px] shadow-brutal" : "border-2 opacity-80"}`}
             >
-              <img src={p.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <img src={p.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover bg-[#ebe4d6]" />
             </button>
           ))}
         </div>

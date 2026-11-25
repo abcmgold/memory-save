@@ -28,7 +28,7 @@ export function MomentCard({ entry }: { entry: Entry }) {
             src={cover.displayUrl}
             alt={entry.body ?? `Khoảnh khắc của ${entry.author.displayName}`}
             loading="lazy"
-            className="aspect-[4/5] w-full object-cover"
+            className="aspect-[4/5] w-full bg-[#ebe4d6] object-cover"
           />
           {entry.body && (
             <span className="absolute bottom-[18px] left-1/2 max-w-[85%] -translate-x-1/2 -rotate-[1.5deg] truncate rounded-xl border-2 border-ink bg-white px-4 py-2 text-[15px] font-bold shadow-brutal">
@@ -47,7 +47,7 @@ export function MomentCard({ entry }: { entry: Entry }) {
             <span className="grid grid-cols-3 gap-2">
               {entry.photos.slice(0, 3).map((p, i) => (
                 <span key={p.id} className="relative block h-[92px] overflow-hidden rounded-xl border-2 border-ink">
-                  <img src={p.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img src={p.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover bg-[#ebe4d6]" />
                   {i === 2 && entry.photos.length > 3 && (
                     <span className="absolute inset-0 flex items-center justify-center bg-lavender/80 text-base font-extrabold">
                       +{entry.photos.length - 3}

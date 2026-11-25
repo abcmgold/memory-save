@@ -98,7 +98,7 @@ export function PhotoGrid({
       <div className="grid grid-cols-4 gap-2.5">
         {items.map((item) => (
           <div key={item.key} className="relative aspect-square rounded-xl border-2 border-ink bg-white shadow-brutal-sm">
-            <img src={item.src} alt="" className="h-full w-full rounded-[10px] object-cover" />
+            <img src={item.src} alt="" className="h-full w-full rounded-[10px] object-cover bg-[#ebe4d6]" />
             {item.status === "uploading" && (
               <div className="absolute inset-x-1.5 bottom-1.5 h-2 overflow-hidden rounded-full border border-ink bg-white">
                 <div className="h-full bg-peach transition-[width]" style={{ width: `${item.progress}%` }} />

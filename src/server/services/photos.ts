@@ -15,14 +15,44 @@ export type PhotoRef = { id: string; width: number; height: number; thumbUrl: st
 const PUT_EXPIRES_SEC = 600;
 const GET_EXPIRES_SEC = 60;
 
-export function toPhotoRef(p: { id: string; width: number | null; height: number | null }): PhotoRef {
-  return {
-    id: p.id,
-    width: p.width ?? 0,
-    height: p.height ?? 0,
-    thumbUrl: `/api/photos/${p.id}/thumb`,
-    displayUrl: `/api/photos/${p.id}/display`,
-  };
+/**
+ * Browser-cacheable image URLs (user decision 2026-11-25, research.md R5 rev): links are signed with the
+ * start of the current hour as the signing date, so every request in that hour gets the SAME URL and the
+ * browser can reuse the cached image (Cache-Control: private, max-age=3600). Entries/APIs still re-check
+ * access on every request; only an image already downloaded on a device stays viewable for ≤ 1 hour.
+ */
+export const IMAGE_CACHE_SEC = 3600;
+const WINDOW_GRACE_SEC = 300; // URL stays valid a little past the window for slow loads / clock skew
+
+export function imageUrlWindow(now = Date.now()): { signingDate: Date; expiresInSec: number } {
+  const start = Math.floor(now / (IMAGE_CACHE_SEC * 1000)) * IMAGE_CACHE_SEC * 1000;
+  return { signingDate: new Date(start), expiresInSec: IMAGE_CACHE_SEC + WINDOW_GRACE_SEC };
+}
+
+/**
+ * Builds PhotoRefs with direct, signed storage URLs. Callers MUST have checked that the viewer may see
+ * these photos (entries.ts only calls this for entries that passed canViewEntry / ownership).
+ */
+export async function toPhotoRefs(
+  photos: { id: string; width: number | null; height: number | null }[],
+): Promise<PhotoRef[]> {
+  if (photos.length === 0) return [];
+  const store = getPhotoStore();
+  const win = imageUrlWindow();
+  const opts = { ...win, contentType: "image/webp", cacheControl: `private, max-age=${IMAGE_CACHE_SEC}` };
+  return Promise.all(
+    photos.map(async (p) => ({
+      id: p.id,
+      width: p.width ?? 0,
+      height: p.height ?? 0,
+      thumbUrl: await store.presignGet(photoKey(p.id, "thumb"), opts),
+      displayUrl: await store.presignGet(photoKey(p.id, "display"), opts),
+    })),
+  );
+}
+
+async function toPhotoRef(p: { id: string; width: number | null; height: number | null }): Promise<PhotoRef> {
+  return (await toPhotoRefs([p]))[0];
 }
 
 export async function requestUpload(
@@ -63,7 +93,7 @@ export async function completeUpload(userId: string, photoId: string): Promise<P
     .from(schema.photos)
     .where(and(eq(schema.photos.id, photoId), eq(schema.photos.uploaderId, userId)));
   if (!photo || photo.status === "attached") throw errors.notFound();
-  if (photo.status === "pending") return toPhotoRef(photo); // idempotent retry
+  if (photo.status === "pending") return await toPhotoRef(photo); // idempotent retry
 
   const store = getPhotoStore();
   const key = photoKey(photoId, "original");
@@ -100,7 +130,7 @@ export async function completeUpload(userId: string, photoId: string): Promise<P
     })
     .where(eq(schema.photos.id, photoId))
     .returning();
-  return toPhotoRef(updated);
+  return await toPhotoRef(updated);
 }
 
 /** Deletes a photo that is not attached to an entry (uploader only). */

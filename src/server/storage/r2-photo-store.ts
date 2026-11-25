@@ -52,14 +52,17 @@ export class R2PhotoStore implements PhotoStore {
     };
   }
 
-  async presignGet(key: string, opts: { expiresInSec: number; contentType?: string }): Promise<string> {
+  async presignGet(
+    key: string,
+    opts: { expiresInSec: number; contentType?: string; signingDate?: Date; cacheControl?: string },
+  ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
       ResponseContentType: opts.contentType,
-      ResponseCacheControl: "private, no-store",
+      ResponseCacheControl: opts.cacheControl ?? "private, no-store",
     });
-    return getSignedUrl(this.client, command, { expiresIn: opts.expiresInSec });
+    return getSignedUrl(this.client, command, { expiresIn: opts.expiresInSec, signingDate: opts.signingDate });
   }
 
   async head(key: string) {

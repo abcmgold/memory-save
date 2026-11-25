@@ -14,8 +14,14 @@ export type PresignedPut = {
 export interface PhotoStore {
   /** Signed PUT URL that only accepts exactly this Content-Type and Content-Length. */
   presignPut(key: string, opts: { contentType: string; contentLength: number; expiresInSec: number }): Promise<PresignedPut>;
-  /** Short-lived signed GET URL. */
-  presignGet(key: string, opts: { expiresInSec: number; contentType?: string }): Promise<string>;
+  /**
+   * Signed GET URL. With `signingDate` fixed (e.g. the start of the current hour) the URL is identical for
+   * every request in that window, so browsers can cache the image; `cacheControl` is returned by the store.
+   */
+  presignGet(
+    key: string,
+    opts: { expiresInSec: number; contentType?: string; signingDate?: Date; cacheControl?: string },
+  ): Promise<string>;
   head(key: string): Promise<{ size: number; contentType?: string } | null>;
   get(key: string): Promise<Buffer | null>;
   put(key: string, body: Buffer, contentType: string): Promise<void>;

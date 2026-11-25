@@ -30,7 +30,7 @@ export function EntryCard({ entry }: { entry: Entry }) {
       />
       {cover && (
         <span className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border-2 border-ink">
-          <img src={cover.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
+          <img src={cover.thumbUrl} alt="" loading="lazy" className="h-full w-full object-cover bg-[#ebe4d6]" />
           {entry.photos.length > 1 && (
             <span className="absolute right-1 bottom-1 rounded-md border-[1.5px] border-ink bg-white px-1.5 text-[11px] font-extrabold">
               {entry.photos.length}

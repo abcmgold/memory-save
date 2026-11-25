@@ -259,7 +259,8 @@ của A. A tạo link mới; C mở link cũ → báo link không còn hiệu l�
   tiếp theo; hủy kết bạn thu hồi quyền xem mọi bài giữa hai người theo cả hai chiều.
 
 **Mã định danh và link kết bạn (rev 3)**
-
+  Ngoại lệ (quyết định 2026-11-25): ảnh mà người xem **đã tải về máy** trước khi bị thu hồi có thể còn hiện từ bộ
+  nhớ đệm trình duyệt tối đa 1 giờ; mọi yêu cầu mới tới bài hoặc API ảnh vẫn bị từ chối ngay.
 - **FR-037**: Khi đăng ký, hệ thống MUST tự sinh một mã định danh công khai, duy nhất, cố định mãi: phần chữ lấy
   từ tên hiển thị (bỏ dấu, chữ thường, các từ nối bằng dấu chấm, tối đa 20 ký tự; nếu tên không có chữ cái/chữ
   số nào thì là `ban`) cộng dấu chấm và 4–6 chữ số ngẫu nhiên. Người dùng không đổi được mã này.

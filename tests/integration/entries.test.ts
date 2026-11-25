@@ -60,7 +60,11 @@ describe("entries (contracts/api.md › Bài nhật ký)", () => {
     const r = await create(an, { title: "Sinh nhật mẹ", eventAt: "2026-11-24T21:10", photoIds: [p2, p1] });
     expect(r.status).toBe(201);
     expect(r.body.entry.photos.map((p: { id: string }) => p.id)).toEqual([p2, p1]);
-    expect(r.body.entry.photos[0].thumbUrl).toBe(`/api/photos/${p2}/thumb`);
+    // Direct signed storage URLs (no /api hop), stable within the hour so browsers can cache them
+    expect(r.body.entry.photos[0].thumbUrl).toContain(photoKey(p2, "thumb"));
+    expect(r.body.entry.photos[0].displayUrl).toContain(photoKey(p2, "display"));
+    const reread = await call(getEntry, "GET", "/x", { cookie: an.cookie, params: { id: r.body.entry.id } });
+    expect(reread.body.entry.photos[0].thumbUrl).toBe(r.body.entry.photos[0].thumbUrl);
     // An attached photo cannot be attached again
     const again = await create(an, { title: "copy", photoIds: [p1] });
     expect(again.status).toBe(422);

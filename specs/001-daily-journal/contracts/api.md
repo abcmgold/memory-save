@@ -23,7 +23,7 @@ Mọi request ghi (POST/PATCH/PUT/DELETE) MUST có header `Origin` trùng host, 
 ```ts
 type UserRef   = { id: string; handle: string; displayName: string };   // rev 3: never the username (FR-038)
 type PhotoRef  = { id: string; width: number; height: number;
-                   thumbUrl: string; displayUrl: string };   // /api/photos/:id/thumb|display
+                   thumbUrl: string; displayUrl: string };   // link R2 đã ký trực tiếp, ổn định trong giờ, cache 1h (research R5 sửa đổi)
 type Audience  = { mode: "private" | "friends" | "custom"; users: UserRef[] };   // chỉ chủ bài thấy
 type Entry = {
   id: string; title: string | null; body: string | null;

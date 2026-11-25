@@ -52,8 +52,9 @@ export class LocalPhotoStore implements PhotoStore {
     };
   }
 
-  async presignGet(key: string, opts: { expiresInSec: number; contentType?: string }): Promise<string> {
-    const exp = String(Math.floor(Date.now() / 1000) + opts.expiresInSec);
+  async presignGet(key: string, opts: { expiresInSec: number; contentType?: string; signingDate?: Date }): Promise<string> {
+    const base = opts.signingDate ? opts.signingDate.getTime() : Date.now();
+    const exp = String(Math.floor(base / 1000) + opts.expiresInSec);
     return url({ key, exp, op: "get", type: opts.contentType ?? "application/octet-stream" });
   }
 
