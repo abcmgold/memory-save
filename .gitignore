@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MemorySave
+!.env.example
+backups/
+*.log
+.vscode/
+.idea/
+Thumbs.db
+
+# local mode data (npm run dev:local)
+.data/
