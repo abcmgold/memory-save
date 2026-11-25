@@ -83,8 +83,8 @@ export function ReviewStep({
         : `Đăng · ${audienceSummary(audience, friends)}`;
 
   return (
-    <div className="flex flex-1 flex-col">
-      <header className="flex items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <header className="flex shrink-0 items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
         <button
           type="button"
           onClick={discard}
@@ -106,9 +106,10 @@ export function ReviewStep({
         </button>
       </header>
 
-      <div className="px-4 pt-3.5">
-        <div className="relative overflow-hidden rounded-[32px] border-[3px] border-ink bg-white shadow-brutal-lg">
-          <img src={preview} alt="Ảnh vừa chụp" className="aspect-[4/5] w-full object-cover" />
+      {/* Photo takes the remaining height; caption, audience and "Đăng" always fit on screen */}
+      <div className="flex min-h-[160px] flex-1 px-4 pt-2">
+        <div className="relative h-full w-full overflow-hidden rounded-[32px] border-[3px] border-ink bg-white shadow-brutal-lg">
+          <img src={preview} alt="Ảnh vừa chụp" className="h-full w-full object-cover" />
           {upload.status === "uploading" && (
             <div className="absolute inset-x-5 top-4 h-2.5 overflow-hidden rounded-full border-2 border-ink bg-white">
               <div className="h-full bg-peach transition-[width]" style={{ width: `${upload.progress}%` }} />
@@ -128,14 +129,14 @@ export function ReviewStep({
         </div>
       </div>
 
-      <section aria-labelledby="aud-title" className="flex flex-col gap-3 px-4 pt-[22px]">
+      <section aria-labelledby="aud-title" className="flex shrink-0 flex-col gap-2.5 px-4 pt-4">
         <h2 id="aud-title" className="text-[15px] font-extrabold">
           Ai được xem?
         </h2>
         <AudiencePicker value={audience} onChange={setAudience} friends={friends} />
       </section>
 
-      <div className="mt-auto flex flex-col gap-3 px-4 pt-6 pb-4">
+      <div className="flex shrink-0 flex-col gap-3 px-4 pt-4 pb-3">
         {upload.status === "error" && (
           <div className="flex items-center justify-between gap-3 rounded-xl border-2 border-ink bg-coral/40 px-3 py-2 text-sm font-semibold">
             <span>{upload.message}</span>

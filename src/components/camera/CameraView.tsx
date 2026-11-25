@@ -103,9 +103,10 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="px-4 pt-5">
-        <div className="relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden rounded-[32px] border-[3px] border-ink bg-[#2b2a27] shadow-brutal-lg">
+    <div className="flex min-h-0 flex-1 flex-col">
+      {/* Viewfinder fills whatever height is left, so the shutter never falls below the fold */}
+      <div className="flex min-h-0 flex-1 px-4 pt-3">
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[32px] border-[3px] border-ink bg-[#2b2a27] shadow-brutal-lg">
           <video
             ref={videoRef}
             playsInline
@@ -145,7 +146,7 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
         </div>
       </div>
 
-      <div className="flex items-center justify-between px-10 pt-[26px]">
+      <div className="flex shrink-0 items-center justify-between px-10 pt-5">
         <button
           type="button"
           onClick={() => libraryRef.current?.click()}
@@ -176,7 +177,7 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
           <SwitchIcon size={24} />
         </button>
       </div>
-      <p className="mt-[18px] text-center text-[13px] font-medium text-muted">
+      <p className="mt-3 mb-1 shrink-0 text-center text-[13px] font-medium text-muted [@media(max-height:700px)]:hidden">
         Chụp xong, thêm chú thích rồi chọn ai được xem
       </p>
 

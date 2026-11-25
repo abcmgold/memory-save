@@ -17,7 +17,7 @@ export default async function CameraHome() {
   const me = toUserRef(user);
 
   const header = (
-    <header className="flex items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
+    <header className="flex shrink-0 items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
       <Link href="/journal" aria-label="Nhật ký của tôi" className="rounded-full shadow-brutal">
         <Avatar name={me.displayName} seed={me.id} size={44} />
       </Link>

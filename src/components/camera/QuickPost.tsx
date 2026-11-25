@@ -34,21 +34,25 @@ export function QuickPost({
 }) {
   const [shot, setShot] = useState<{ blob: Blob; at: string } | null>(null);
 
-  if (shot) {
-    return (
-      <ReviewStep
-        photo={shot.blob}
-        takenAt={shot.at}
-        friends={friends}
-        defaultAudience={defaultAudience}
-        onRetake={() => setShot(null)}
-      />
-    );
-  }
+  // Fits exactly one screen above the bottom nav (layout reserves 96px for it): the photo area
+  // flexes, controls and the "Đăng" button always stay visible. On very short screens (min-h)
+  // the page may scroll instead of squashing the photo to nothing.
   return (
-    <>
-      {header}
-      <CameraView onCapture={(blob) => setShot({ blob, at: localStamp(timeZone) })} />
-    </>
+    <div className="flex h-[calc(100dvh-96px)] min-h-[520px] flex-col">
+      {shot ? (
+        <ReviewStep
+          photo={shot.blob}
+          takenAt={shot.at}
+          friends={friends}
+          defaultAudience={defaultAudience}
+          onRetake={() => setShot(null)}
+        />
+      ) : (
+        <>
+          {header}
+          <CameraView onCapture={(blob) => setShot({ blob, at: localStamp(timeZone) })} />
+        </>
+      )}
+    </div>
   );
 }

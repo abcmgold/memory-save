@@ -183,22 +183,24 @@ export function FormSkeleton({ title }: { title: string }) {
 export function CameraSkeleton() {
   return (
     <Shell label="Đang mở camera…">
-      <div className="flex items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
+      <div className="flex h-[calc(100dvh-96px)] min-h-[520px] flex-col">
+      <div className="flex shrink-0 items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
         <Bone className="h-11 w-11 rounded-full" />
         <span className="-rotate-2 border-[2.5px] border-ink bg-lavender px-3.5 py-1 text-xl font-black tracking-tight shadow-brutal-lg">
           MemorySave
         </span>
         <Bone className="h-11 w-11 rounded-full" />
       </div>
-      <div className="px-4 pt-5">
-        <div className="aspect-[4/5] w-full rounded-[32px] border-[3px] border-ink bg-[#2b2a27] shadow-brutal-lg" />
+      <div className="flex min-h-0 flex-1 px-4 pt-3">
+        <div className="h-full w-full rounded-[32px] border-[3px] border-ink bg-[#2b2a27] shadow-brutal-lg" />
       </div>
-      <div className="flex items-center justify-between px-10 pt-[26px]">
+      <div className="flex shrink-0 items-center justify-between px-10 pt-5 pb-12 [@media(max-height:700px)]:pb-3">
         <Bone className="h-[52px] w-[52px] rounded-2xl" />
         <span className="flex h-[84px] w-[84px] items-center justify-center rounded-full border-[3px] border-ink bg-white shadow-brutal-lg">
           <span className="block h-[60px] w-[60px] rounded-full border-2 border-ink bg-peach" />
         </span>
         <Bone className="h-[52px] w-[52px] rounded-full" />
+      </div>
       </div>
     </Shell>
   );
