@@ -19,7 +19,8 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
   const endpoint = `/api/entries?scope=mine${date ? `&date=${date}` : ""}`;
 
   return (
-    <>
+    // `group` + the header's data-pending (set while a date change loads) dims the list below.
+    <div className="group flex flex-1 flex-col">
       <JournalHeader
         selected={date}
         today={today}
@@ -33,7 +34,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
           </>
         }
       />
-      <main className="flex-1 px-4 pt-1 pb-6">
+      <main className="flex-1 px-4 pt-1 pb-6 transition-opacity duration-150 group-has-data-pending:pointer-events-none group-has-data-pending:opacity-50">
         {date && (
           <Link href="/journal" className="mt-3 inline-block text-sm font-extrabold underline underline-offset-4">
             ← Về hôm nay
@@ -57,6 +58,6 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
           }
         />
       </main>
-    </>
+    </div>
   );
 }

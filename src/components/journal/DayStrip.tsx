@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { startTransition, useOptimistic, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarIcon, PlusIcon } from "@/components/ui/icons";
 import { formatLongDate, shortDow, weekOf } from "@/lib/format-date";
@@ -20,13 +20,27 @@ export function JournalHeader({
 }) {
   const router = useRouter();
   const picker = useRef<HTMLInputElement>(null);
-  const focus = selected ?? today;
+  // Changing ?date= re-renders this same page on the server, so loading.tsx never shows and Next.js
+  // keeps the old screen until the data arrives. Run the navigation in a transition: the tapped day
+  // highlights on this frame and `data-pending` lets the page dim the list (Next.js docs › guides ›
+  // interactive-apps › "Filter with pending feedback").
+  const [optimisticSelected, setOptimisticSelected] = useOptimistic(selected);
+  const [pending, setPending] = useOptimistic(false);
+  const focus = optimisticSelected ?? today;
   const days = weekOf(focus);
   const has = new Set(marked);
-  const go = (d: string | null) => router.push(d ? `/journal?date=${d}` : "/journal");
+  const go = (d: string | null) =>
+    startTransition(() => {
+      setOptimisticSelected(d);
+      setPending(true);
+      router.push(d ? `/journal?date=${d}` : "/journal");
+    });
 
   return (
-    <header className="sticky top-0 z-20 flex flex-col gap-4 border-b-2 border-ink bg-cream px-4 pt-[max(20px,env(safe-area-inset-top))] pb-3.5">
+    <header
+      data-pending={pending ? "" : undefined}
+      aria-busy={pending || undefined}
+      className="sticky top-0 z-20 flex flex-col gap-4 border-b-2 border-ink bg-cream px-4 pt-[max(20px,env(safe-area-inset-top))] pb-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2.5">{title}</div>
         <div className="flex shrink-0 gap-2.5">
