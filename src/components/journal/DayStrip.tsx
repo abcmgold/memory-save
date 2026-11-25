@@ -30,19 +30,37 @@ export function JournalHeader({
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-2.5">{title}</div>
         <div className="flex shrink-0 gap-2.5">
-          <button
-            type="button"
-            aria-label="Nhảy tới ngày"
-            onClick={() => {
-              const el = picker.current;
-              if (!el) return;
-              if (typeof el.showPicker === "function") el.showPicker();
-              else el.click();
-            }}
-            className="flex h-[46px] w-[46px] items-center justify-center rounded-[14px] border-2 border-ink bg-white shadow-brutal"
+          {/*
+            The real <input type="date"> sits transparently ON TOP of the calendar icon, so a tap hits the
+            native control directly. iOS Safari won't open the picker for a visually-hidden input via
+            showPicker()/click(); desktop browsers still get showPicker() on click.
+          */}
+          <label
+            className="relative flex h-[46px] w-[46px] items-center justify-center rounded-[14px] border-2 border-ink bg-white shadow-brutal has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-ink"
+            title="Nhảy tới ngày"
           >
             <CalendarIcon size={20} />
-          </button>
+            <input
+              ref={picker}
+              type="date"
+              max={today}
+              value={focus}
+              aria-label="Nhảy tới ngày"
+              className="absolute inset-0 h-full w-full cursor-pointer text-base opacity-0"
+              onClick={() => {
+                const el = picker.current;
+                try {
+                  if (el && typeof el.showPicker === "function") el.showPicker();
+                } catch {
+                  /* some browsers only allow showPicker from certain gestures; the native tap still works */
+                }
+              }}
+              onChange={(e) => {
+                const d = e.target.value;
+                if (d && d <= today) go(d === today ? null : d);
+              }}
+            />
+          </label>
           <Link
             href="/journal/new"
             aria-label="Viết bài mới"
@@ -50,16 +68,6 @@ export function JournalHeader({
           >
             <PlusIcon size={20} />
           </Link>
-          <input
-            ref={picker}
-            type="date"
-            max={today}
-            defaultValue={focus}
-            aria-label="Chọn ngày"
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => e.target.value && go(e.target.value)}
-          />
         </div>
       </div>
       <div role="list" aria-label="Chọn ngày trong tuần" className="grid grid-cols-7 gap-1.5">
