@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getCurrentUser } from "../http/auth";
@@ -7,7 +8,7 @@ import { nowLocal } from "../domain/clock";
 import { defaultAudience } from "../domain/audience";
 import type { AudienceInput, UserRef } from "@/lib/types";
 import type { SessionUser } from "./sessions";
-import { listFriends } from "./friends";
+import { countIncomingRequests, listFriends } from "./friends";
 
 /** Shared server-side data for pages under (app): signed-in user, local "now", friends, default audience. */
 export async function requirePageUser(): Promise<SessionUser> {
@@ -36,3 +37,6 @@ export async function composeContext(user: SessionUser): Promise<{ friends: User
     defaultAudience: defaultAudience(user.lastAudience, friends.map((f) => f.id)),
   };
 }
+
+/** Invitation badge count, shared by the bottom nav and the camera header within one request. */
+export const incomingCount = cache((userId: string) => countIncomingRequests(userId));

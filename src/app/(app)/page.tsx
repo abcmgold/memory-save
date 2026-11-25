@@ -2,8 +2,7 @@ import Link from "next/link";
 import { QuickPost } from "@/components/camera/QuickPost";
 import { Avatar } from "@/components/ui/primitives";
 import { UsersIcon } from "@/components/ui/icons";
-import { composeContext, requirePageUser } from "@/server/services/page-data";
-import { countIncomingRequests } from "@/server/services/friends";
+import { composeContext, incomingCount, requirePageUser } from "@/server/services/page-data";
 import { getAppTimeZone } from "@/server/env";
 import { toUserRef } from "@/server/services/auth";
 
@@ -13,7 +12,7 @@ export default async function CameraHome() {
   const user = await requirePageUser();
   const [{ friends, defaultAudience }, incoming] = await Promise.all([
     composeContext(user),
-    countIncomingRequests(user.id),
+    incomingCount(user.id),
   ]);
   const me = toUserRef(user);
 
