@@ -83,7 +83,13 @@ export function ReviewStep({
         : `Đăng · ${audienceSummary(audience, friends)}`;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    // Full-screen step (covers the bottom nav, like a camera app) so the photo gets the height.
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Xem lại ảnh trước khi đăng"
+      className="fixed inset-0 z-40 mx-auto flex h-dvh w-full max-w-[480px] flex-col bg-cream bg-[radial-gradient(var(--color-dot)_1.2px,transparent_1.4px)] bg-size-[20px_20px]"
+    >
       <header className="flex shrink-0 items-center justify-between px-4 pt-[max(16px,env(safe-area-inset-top))] pb-2">
         <button
           type="button"
@@ -129,14 +135,14 @@ export function ReviewStep({
         </div>
       </div>
 
-      <section aria-labelledby="aud-title" className="flex shrink-0 flex-col gap-2.5 px-4 pt-4">
-        <h2 id="aud-title" className="text-[15px] font-extrabold">
+      <section aria-labelledby="aud-title" className="flex shrink-0 flex-col gap-2 px-4 pt-3.5">
+        <h2 id="aud-title" className="text-sm font-extrabold">
           Ai được xem?
         </h2>
-        <AudiencePicker value={audience} onChange={setAudience} friends={friends} />
+        <AudiencePicker value={audience} onChange={setAudience} friends={friends} compact />
       </section>
 
-      <div className="flex shrink-0 flex-col gap-3 px-4 pt-4 pb-3">
+      <div className="flex shrink-0 flex-col gap-3 px-4 pt-3.5 pb-[max(14px,env(safe-area-inset-bottom))]">
         {upload.status === "error" && (
           <div className="flex items-center justify-between gap-3 rounded-xl border-2 border-ink bg-coral/40 px-3 py-2 text-sm font-semibold">
             <span>{upload.message}</span>

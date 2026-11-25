@@ -3,12 +3,13 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { getEnv } from "../env";
+import { localDataDir } from "@/lib/local-data-dir";
 import type { PhotoStore, PresignedPut } from "./photo-store";
 
-// Local mode only: photos on disk under .data/photos, served through /api/local-storage with
+// Local mode only: photos on disk under <localDataDir>/photos (outside the project — see local-data-dir.ts), served through /api/local-storage with
 // HMAC-signed, expiring URLs — the same contract as R2 presigned URLs (research.md R5–R6).
 
-const ROOT = path.resolve(process.cwd(), ".data");
+const ROOT = localDataDir();
 const KEY_RE = /^photos\/[0-9a-f-]{36}\/(original|display\.webp|thumb\.webp)$/;
 
 export function isValidKey(key: string): boolean {

@@ -8,6 +8,7 @@ import sharp from "sharp";
 import { Pool } from "pg";
 import { addMinutes, localToDb, nowLocal } from "../src/server/domain/clock";
 import { formatHandle, handleBase } from "../src/server/domain/handle";
+import { localDataDir } from "../src/lib/local-data-dir";
 
 const URL = "postgres://postgres:postgres@127.0.0.1:5433/postgres";
 const PASSWORD = "matkhau123";
@@ -22,7 +23,7 @@ const USERS = [
 
 async function makePhoto(color: string): Promise<{ id: string; width: number; height: number; bytes: number }> {
   const id = randomUUID();
-  const dir = path.resolve(".data/photos", id);
+  const dir = path.join(localDataDir(), "photos", id);
   fs.mkdirSync(dir, { recursive: true });
   const base = sharp({ create: { width: 1200, height: 1500, channels: 3, background: color } });
   const original = await base.clone().jpeg({ quality: 85 }).toBuffer();
@@ -43,7 +44,7 @@ async function main() {
   // Already seeded? (the sample friends only exist after a seed)
   const { rows: seeded } = await pool.query("select 1 from users where username = 'minh_tran'");
   if (seeded.length) {
-    console.log("Dữ liệu mẫu đã có sẵn. Muốn nạp lại từ đầu: dừng `npm run dev:local`, xóa thư mục .data/, chạy lại rồi seed.");
+    console.log("Dữ liệu mẫu đã có sẵn. Muốn nạp lại từ đầu: dừng `npm run dev:local`, xóa thư mục ~/.memorysave-local, chạy lại rồi seed.");
     await pool.end();
     return;
   }

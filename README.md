@@ -16,9 +16,9 @@ npm install
 npm run dev:local          # http://localhost:3000
 ```
 
-Dùng Postgres nhúng (PGlite) và lưu ảnh trong `.data/`. Muốn có sẵn tài khoản test (mật khẩu `matkhau123`), chạy
-`npm run seed:local` ở terminal khác khi server đang chạy. Làm lại từ đầu: dừng server rồi xóa `.data/` (đừng xóa
-khi server đang chạy).
+Dùng Postgres nhúng (PGlite) và lưu ảnh trong `~/.memorysave-local/` (ngoài thư mục dự án). Muốn có sẵn tài khoản test (mật khẩu `matkhau123`), chạy
+`npm run seed:local` ở terminal khác khi server đang chạy. Làm lại từ đầu: dừng server rồi xóa
+`~/.memorysave-local/` (đừng xóa khi server đang chạy).
 Chế độ này tự chặn khi chạy production. Camera hoạt động trên `localhost`.
 
 ## Kiểm thử

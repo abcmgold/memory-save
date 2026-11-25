@@ -24,10 +24,13 @@ export function AudiencePicker({
   value,
   onChange,
   friends,
+  compact = false,
 }: {
   value: AudienceInput;
   onChange: (v: AudienceInput) => void;
   friends: UserRef[];
+  /** One-row segmented control; friend avatars only while choosing (quick-post review screen). */
+  compact?: boolean;
 }) {
   const [choosing, setChoosing] = useState(value.mode === "custom");
   const selected = new Set(value.mode === "custom" ? (value.userIds ?? []) : value.mode === "friends" ? friends.map((f) => f.id) : []);
@@ -39,6 +42,91 @@ export function AudiencePicker({
     else next.add(id);
     setChoosing(true);
     onChange({ mode: "custom", userIds: [...next] });
+  }
+
+  if (compact) {
+    const seg = (on: boolean) =>
+      `flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border-2 border-ink px-1.5 text-[13px] disabled:opacity-40 ${on ? "bg-lavender font-extrabold shadow-brutal" : "bg-white font-semibold"}`;
+    const showAvatars = friends.length > 0 && (choosing || mode === "custom");
+    return (
+      <div className="flex flex-col gap-2.5">
+        <div role="group" aria-label="Ai được xem" className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            aria-pressed={mode === "private" && !choosing}
+            aria-label="Chỉ mình tôi"
+            className={seg(mode === "private" && !choosing)}
+            onClick={() => {
+              setChoosing(false);
+              onChange({ mode: "private", userIds: [] });
+            }}
+          >
+            <LockIcon size={15} strokeWidth={2.2} className="shrink-0" />
+            <span className="truncate">Chỉ tôi</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={mode === "friends"}
+            aria-label="Tất cả bạn bè"
+            className={seg(mode === "friends")}
+            onClick={() => {
+              setChoosing(false);
+              onChange({ mode: "friends", userIds: [] });
+            }}
+          >
+            <UsersIcon size={15} strokeWidth={2.2} className="shrink-0" />
+            <span className="truncate">Bạn bè</span>
+          </button>
+          <button
+            type="button"
+            aria-pressed={choosing || mode === "custom"}
+            aria-label="Chọn bạn"
+            disabled={friends.length === 0}
+            className={seg(choosing || mode === "custom")}
+            onClick={() => {
+              setChoosing(true);
+              onChange({ mode: "custom", userIds: [...selected] });
+            }}
+          >
+            <UserIcon size={15} strokeWidth={2.2} className="shrink-0" />
+            <span className="truncate">Chọn bạn</span>
+          </button>
+        </div>
+        {friends.length === 0 && (
+          <p className="truncate text-[13px] font-medium text-muted">
+            Chưa có bạn bè nên chỉ bạn xem được ·{" "}
+            <Link href="/friends" className="font-extrabold text-ink underline underline-offset-2">
+              Thêm bạn
+            </Link>
+          </p>
+        )}
+        {showAvatars && (
+          <div role="group" aria-label="Chọn bạn được xem" className="no-scrollbar flex gap-3.5 overflow-x-auto px-1 pt-1">
+            {friends.map((f) => {
+              const on = selected.has(f.id);
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => toggle(f.id)}
+                  aria-pressed={on}
+                  aria-label={`${f.displayName} — ${on ? "được xem" : "không được xem"}`}
+                  className="relative flex w-12 shrink-0 flex-col items-center gap-1"
+                >
+                  <Avatar name={f.displayName} seed={f.id} size={44} className={on ? "shadow-brutal" : "opacity-35"} />
+                  {on && (
+                    <span className="absolute -top-1 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-white">
+                      <CheckIcon size={11} />
+                    </span>
+                  )}
+                  <span className="w-full truncate text-center text-[11px] font-semibold">{f.displayName}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (

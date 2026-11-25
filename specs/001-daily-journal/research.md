@@ -188,7 +188,8 @@ Rev 2 (2026-11-25): chuyển sang PostgreSQL và triển khai miễn phí trên 
 - **R11 bổ sung — font tự host bằng `@fontsource/be-vietnam-pro`** thay vì `next/font/google`: build không phụ
   thuộc việc truy cập fonts.googleapis.com (môi trường dev bị chặn DNS) và không gọi CDN khi chạy.
 - **R17 — Chế độ local (`npm run dev:local`)**: Postgres nhúng (PGlite qua `@electric-sql/pglite-socket`,
-  cổng 5433, dữ liệu `.data/pglite`) + kho ảnh trên đĩa (`.data/photos`) phục vụ qua `/api/local-storage` với URL
+  cổng 5433) + kho ảnh trên đĩa, cả hai trong `~/.memorysave-local` — **ngoài** thư mục dự án vì Turbopack
+  theo dõi mọi file trong project root (ghi DB vào trong project sẽ kích hoạt biên dịch lại liên tục khi dev) phục vụ qua `/api/local-storage` với URL
   ký HMAC có hạn — cùng hợp đồng như presigned URL của R2. Bật bằng `MS_LOCAL=1`; tự báo lỗi nếu chạy trên
   Vercel/production. DB client chọn driver theo host: `*.neon.tech` → Neon serverless, còn lại → node-postgres.
   Lý do: ràng buộc kỹ thuật "chạy local dễ dàng" và cho phép kiểm thử end-to-end trước khi có tài khoản đám mây.
