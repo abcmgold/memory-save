@@ -15,7 +15,7 @@ export function TextField({
 }: Common & React.InputHTMLAttributes<HTMLInputElement> & { inputClassName?: string }) {
   const id = useId();
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <label htmlFor={id} className="text-sm font-extrabold">
         {label}
       </label>
@@ -45,7 +45,7 @@ export function TextArea({
 }: Common & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const id = useId();
   return (
-    <div className={`flex flex-col gap-1.5 ${className}`}>
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
       <label htmlFor={id} className="text-sm font-extrabold">
         {label}
       </label>

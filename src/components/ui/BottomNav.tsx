@@ -27,10 +27,13 @@ export function BottomNav({ incomingCount = 0 }: { incomingCount?: number }) {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`relative flex flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] ${active ? "border-2 border-ink bg-lavender font-extrabold shadow-brutal" : "font-semibold"}`}
+            className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-0.5 text-center ${active ? "border-2 border-ink bg-lavender font-extrabold shadow-brutal" : "border-2 border-transparent font-semibold"}`}
           >
-            <Icon size={22} />
-            {label}
+            <Icon size={22} className="shrink-0" />
+            {/* One line, centered; shrinks slightly on narrow phones so "Khoảnh khắc" never wraps */}
+            <span className="max-w-full text-[clamp(9.5px,2.75vw,11px)] leading-none tracking-tight whitespace-nowrap">
+              {label}
+            </span>
             {showBadge && (
               <span className="absolute top-0 right-2 flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-ink bg-pink px-1 text-[11px] font-extrabold">
                 {incomingCount}

@@ -36,19 +36,28 @@ Kiểm tra trước khi push: `.env.local`, `.data/`, `backups/` **không** nằ
 > Không cần tạo bảng thủ công — mỗi lần deploy, bước build tự chạy migration (`npm run db:migrate`).
 
 ---
-
 ## 2. Cloudflare R2 — kho ảnh
 
 1. Đăng ký dash.cloudflare.com → **R2 Object Storage** → kích hoạt (cần thêm phương thức thanh toán; trong hạn
    mức free 10 GB không bị trừ tiền).
 2. **Create bucket**: tên `memorysave-photos`, Location: *Automatic* hoặc gợi ý *Asia-Pacific*.
    **Không** bật *Public access* / *r2.dev subdomain* / custom domain — bucket phải private.
-3. Ghi lại **Account ID** (góc phải trang R2 Overview) → `R2_ACCOUNT_ID`.
-4. **Manage R2 API Tokens → Create API token**
-   - Permissions: **Object Read & Write** · Specify bucket: chỉ `memorysave-photos`
-   - Sao chép **Access Key ID** → `R2_ACCESS_KEY_ID`, **Secret Access Key** → `R2_SECRET_ACCESS_KEY`
-     (secret chỉ hiện một lần).
-5. Bucket → **Settings → CORS policy** → dán (sửa tên miền sau khi có ở bước 3):
+3. **Account ID** → `R2_ACCOUNT_ID`. Một trong các cách sau:
+   - Nhìn thanh địa chỉ khi đang ở trang R2: `https://dash.cloudflare.com/`**`<ACCOUNT_ID>`**`/r2/...` — chuỗi 32 ký tự
+     ngay sau `dash.cloudflare.com/`.
+   - Bấm **Search** (hoặc `Ctrl + K`) ở bất kỳ trang nào → gõ `Copy account ID` → chọn kết quả để sao chép.
+   - Vào **Workers & Pages** → mục **Account Details** → nút sao chép cạnh **Account ID**.
+   aa06f8dfa09693e4e7489a40a64968fc
+4. Tạo API token: trang **R2 object storage** (Overview) → mục **Account Details** → bấm **Manage** cạnh
+   **API Tokens** → **Create Account API token**
+   - Permissions: **Object Read & Write**
+   - Phạm vi bucket: chọn chỉ áp dụng cho `memorysave-photos`
+   - Bấm **Create Account API token** → sao chép ngay **Access Key ID** → `R2_ACCESS_KEY_ID` và
+     **Secret Access Key** → `R2_SECRET_ACCESS_KEY` (secret chỉ hiện **một lần**).
+   - Trang này có thể hiện thêm "Token value" và đường dẫn endpoint — app không cần token value.
+5. CORS: trang **R2 object storage** → bấm vào bucket `memorysave-photos` → tab **Settings** → mục **CORS Policy**
+   → **Add CORS policy** → chọn tab **JSON** → dán nội dung dưới đây → **Save**
+   (sửa tên miền cho đúng sau khi có ở bước 3 của Vercel; chỉ ghi `https://ten-mien`, không có `/` ở cuối):
 
 ```json
 [

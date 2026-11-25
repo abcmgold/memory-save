@@ -59,6 +59,27 @@ textarea::placeholder {
   color: #8a8478;
 }
 
+/* iOS Safari renders date/time inputs with a native min-width that ignores width:100% and
+   overflows narrow grid cells (seen on iPhone 14 Pro). Reset the native look so they shrink. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  display: block;
+}
+input::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+
+/* Safety net: never allow sideways page scrolling on phones (clip keeps position:sticky working). */
+html,
+body {
+  overflow-x: clip;
+}
+
 /* Hide scrollbars on horizontal strips but keep them scrollable */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
