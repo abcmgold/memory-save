@@ -6,7 +6,7 @@ import { createUser, type TestUser } from "../helpers/factories";
 import { MemoryPhotoStore } from "../helpers/memory-photo-store";
 import { uploadPhoto } from "../helpers/photos";
 import { setPhotoStoreForTests, photoKey } from "@/server/storage/photo-store";
-import { schema } from "@/server/db/client";
+import { getDb, schema } from "@/server/db/client";
 import { POST as createEntry } from "@/app/api/entries/route";
 import { GET as cron } from "@/app/api/cron/cleanup/route";
 
@@ -63,5 +63,19 @@ describe("daily cleanup (contracts/api.md › Cron; data-model.md photo lifecycl
     expect(store.objects.has(photoKey(stale, "original"))).toBe(false);
     expect(store.objects.has(photoKey(kept, "display"))).toBe(true);
     expect(store.objects.has(photoKey(fresh, "thumb"))).toBe(true);
+  });
+
+  it("removes expired pending Google sign-ups and keeps fresh ones (002)", async () => {
+    const db = getDb();
+    const minute = 60_000;
+    await db.insert(schema.pendingGoogleSignups).values([
+      { tokenHash: "old", googleSub: "s1", googleEmail: "a@x.com", suggestedName: "A", expiresAt: new Date(Date.now() - minute) },
+      { tokenHash: "new", googleSub: "s2", googleEmail: "b@x.com", suggestedName: "B", expiresAt: new Date(Date.now() + 5 * minute) },
+    ]);
+    const res = await run(process.env.CRON_SECRET);
+    expect(res.status).toBe(200);
+    expect(res.body.removedPendingGoogleSignups).toBe(1);
+    const left = await db.select({ t: schema.pendingGoogleSignups.tokenHash }).from(schema.pendingGoogleSignups);
+    expect(left).toEqual([{ t: "new" }]);
   });
 });

@@ -4,15 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { FormError, TextField } from "@/components/ui/Field";
+import { GoogleButton, OrDivider } from "@/components/ui/GoogleButton";
 import { api, ApiError } from "@/lib/api-client";
 
 type Mode = "login" | "register";
 
-export function LoginForm({ next, initialMode = "login" }: { next: string | null; initialMode?: Mode }) {
+export function LoginForm({
+  next,
+  initialMode = "login",
+  googleEnabled = false,
+  initialError = null,
+}: {
+  next: string | null;
+  initialMode?: Mode;
+  googleEnabled?: boolean;
+  initialError?: string | null; // from /login?error=google_* (002 research R9)
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [fields, setFields] = useState<Record<string, string>>({});
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -103,6 +114,12 @@ export function LoginForm({ next, initialMode = "login" }: { next: string | null
           {busy ? "Đang xử lý…" : mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}
         </Button>
       </form>
+      {googleEnabled && (
+        <>
+          <OrDivider />
+          <GoogleButton next={next} />
+        </>
+      )}
     </div>
   );
 }

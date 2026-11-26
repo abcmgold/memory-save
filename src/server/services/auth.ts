@@ -2,7 +2,7 @@ import "server-only";
 import { randomBytes, randomInt } from "node:crypto";
 import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
-import { getDb, schema } from "../db/client";
+import { getDb, schema, type DbOrTx } from "../db/client";
 import { errors } from "../http/errors";
 import { msg } from "@/lib/messages";
 import type { UserRef } from "@/lib/types";
@@ -47,22 +47,36 @@ export async function registerUser(input: {
   const existing = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.username, username));
   if (existing.length > 0) throw errors.conflict(msg.usernameTaken);
   const passwordHash = await hash(input.password, ARGON_OPTS);
-  const base = handleBase(displayName);
+  try {
+    return toUserRef(await insertUser({ username, passwordHash, displayName }));
+  } catch (err) {
+    const { code, constraint } = pgError(err);
+    if (code === "23505" && constraint === "users_username_unique") throw errors.conflict(msg.usernameTaken);
+    throw err;
+  }
+}
 
+type NewUser = Omit<typeof schema.users.$inferInsert, "id" | "handle" | "inviteToken"> & { displayName: string };
+
+/**
+ * Inserts a user with a freshly allocated public handle and invite token (FR-037, FR-039).
+ * Retries only on handle/token collisions; every other error (e.g. a taken username or Google account) is rethrown.
+ */
+export async function insertUser(values: NewUser, db: DbOrTx = getDb()): Promise<schema.UserRow> {
+  const base = handleBase(values.displayName);
   // FR-037: "<base>.<4 digits>", widening to 5–6 digits if the short space is crowded.
   for (let attempt = 0; attempt < 10; attempt++) {
     const handle = formatHandle(base, randomDigits(attempt < 5 ? 4 : attempt < 8 ? 5 : 6));
     try {
       const [user] = await db
         .insert(schema.users)
-        .values({ username, passwordHash, displayName, handle, inviteToken: newInviteToken() })
+        .values({ ...values, handle, inviteToken: newInviteToken() })
         .returning();
-      return toUserRef(user);
+      return user;
     } catch (err) {
       const { code, constraint } = pgError(err);
-      if (code !== "23505") throw err;
-      if (constraint === "users_username_unique") throw errors.conflict(msg.usernameTaken);
-      // handle (or, astronomically unlikely, token) collision → try another number
+      const collision = constraint === "users_handle_unique" || constraint === "users_invite_token_unique";
+      if (code !== "23505" || !collision) throw err;
     }
   }
   throw new Error("Could not allocate a unique handle");
@@ -73,7 +87,7 @@ export async function authenticate(input: { username: string; password: string }
   if (await isLoginBlocked(username)) throw errors.rateLimited();
   const [user] = await getDb().select().from(schema.users).where(eq(schema.users.username, username));
   let ok = false;
-  if (user) {
+  if (user?.passwordHash) {
     ok = await verify(user.passwordHash, input.password);
   } else {
     dummyHash ??= await hash("memorysave-dummy-password", ARGON_OPTS);

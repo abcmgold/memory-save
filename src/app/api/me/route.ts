@@ -6,6 +6,11 @@ export const runtime = "nodejs";
 
 export const GET = route(async (req) => {
   const user = await requireUser(req);
-  // `username` is returned to its owner only (FR-038)
-  return json({ user: toUserRef(user), username: user.username, lastAudience: user.lastAudience });
+  // `username` and `googleEmail` are returned to their owner only (FR-038, 002 FR-G09)
+  return json({
+    user: toUserRef(user),
+    username: user.username,
+    googleEmail: user.googleEmail,
+    lastAudience: user.lastAudience,
+  });
 });

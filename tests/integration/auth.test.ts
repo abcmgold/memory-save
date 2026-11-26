@@ -58,7 +58,7 @@ describe("auth (contracts/api.md › Xác thực)", () => {
     expect(rows).toHaveLength(1);
     expect(rows[0].tokenHash).not.toBe(token);
     const [user] = await db.select().from(schema.users);
-    expect(user.passwordHash.startsWith("$argon2id$")).toBe(true);
+    expect(user.passwordHash?.startsWith("$argon2id$")).toBe(true);
   });
 
   it("rejects a taken username with 409", async () => {
@@ -134,5 +134,25 @@ describe("auth (contracts/api.md › Xác thực)", () => {
     expect(none.status).toBe(403);
     const db = await setupTestDb();
     expect(await db.select().from(schema.users).where(eq(schema.users.username, "an_nguyen"))).toHaveLength(0);
+  });
+
+  // 002-google-login FR-G10, FR-G11
+  it("never lets a Google-only account in through the password form; password accounts still work", async () => {
+    const db = await setupTestDb();
+    await db.insert(schema.users).values({
+      googleSub: "google-sub-1",
+      googleEmail: "an@gmail.com",
+      displayName: "An Google",
+      handle: "an.google.1234",
+      inviteToken: "google-invite-token-000000",
+    });
+    for (const username of ["an.google.1234", "an@gmail.com", "google-sub-1", ""]) {
+      const res = await call(login, "POST", "/api/auth/login", { body: { username: username || "x", password: "matkhau123" } });
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe("INVALID_CREDENTIALS");
+    }
+    expect((await signUp("minh_tran")).status).toBe(201);
+    const ok = await call(login, "POST", "/api/auth/login", { body: { username: "minh_tran", password: "matkhau123" } });
+    expect(ok.status).toBe(200);
   });
 });

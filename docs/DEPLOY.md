@@ -102,6 +102,28 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 
 Cron dọn dẹp (`vercel.json`) tự đăng ký: chạy 03:00 giờ Việt Nam mỗi ngày.
 
+### 3.1 Đăng nhập bằng Google (tùy chọn)
+
+Bỏ qua mục này thì app chạy bình thường, chỉ không có nút "Tiếp tục với Google".
+
+1. Vào console.cloud.google.com → tạo project (vd `memorysave`).
+2. **APIs & Services → OAuth consent screen**: chọn External, tên ứng dụng "MemorySave", thêm scope `openid`,
+   `email`, `profile`. Khi còn ở chế độ *Testing*, chỉ email có trong **Test users** đăng nhập được — thêm email
+   người dùng thử, hoặc bấm **Publish app** khi sẵn sàng.
+3. **Credentials → Create credentials → OAuth client ID** → loại **Web application**. Ở **Authorized redirect URIs**
+   thêm đúng:
+   - `https://<tên-miền-vercel>/api/auth/google/callback`
+   - `http://localhost:3000/api/auth/google/callback` (để chạy local)
+4. Thêm biến môi trường trên Vercel (và vào `.env.local` khi chạy local), rồi **Redeploy**:
+
+| Tên | Giá trị |
+|---|---|
+| `GOOGLE_CLIENT_ID` | `....apps.googleusercontent.com` |
+| `GOOGLE_CLIENT_SECRET` | client secret vừa tạo |
+
+> Redirect URI lấy theo tên miền đang mở app. Bản **preview** của Vercel có tên miền khác, nên đăng nhập Google ở
+> preview sẽ báo `redirect_uri_mismatch` trừ khi bạn thêm URI của preview đó vào bước 3.
+
 ---
 
 ## 4. Kiểm tra sau khi deploy
@@ -109,6 +131,7 @@ Cron dọn dẹp (`vercel.json`) tự đăng ký: chạy 03:00 giờ Việt Nam 
 Mở tên miền trên **điện thoại** (có HTTPS nên camera dùng được):
 
 - [ ] Đăng ký 2 tài khoản (2 trình duyệt hoặc 1 cửa sổ ẩn danh)
+- [ ] (Nếu bật Google) Bấm "Tiếp tục với Google" → xác nhận tên hiển thị → vào trang chính
 - [ ] Viết bài kèm ảnh từ thư viện — thấy tiến trình tải, ảnh hiện đúng chiều
 - [ ] Đăng nhanh bằng camera, đổi camera trước/sau
 - [ ] Trang Bạn bè → sao chép link kết bạn → mở ở tài khoản kia → tự thành bạn

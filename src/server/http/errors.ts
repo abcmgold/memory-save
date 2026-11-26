@@ -28,6 +28,7 @@ export const errors = {
   unsupportedType: (message: string = msg.photoUnsupported) => new AppError(415, "UNSUPPORTED_TYPE", message),
   rule: (message: string, fields?: Record<string, string>) => new AppError(422, "RULE", message, fields),
   rateLimited: () => new AppError(429, "RATE_LIMITED", msg.rateLimited),
+  gone: (message: string) => new AppError(410, "GONE", message),
 };
 
 export function errorResponse(err: unknown): Response {

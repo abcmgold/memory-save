@@ -4,7 +4,7 @@ import { errorResponse, errors } from "./errors";
 const MUTATING = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 /** Host the request was addressed to (Vercel sets x-forwarded-host). */
-function requestHost(req: Request): string {
+export function requestHost(req: Request): string {
   return req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? new URL(req.url).host;
 }
 
@@ -26,6 +26,11 @@ export function isHttps(req: Request): boolean {
   const proto = req.headers.get("x-forwarded-proto");
   if (proto) return proto.split(",")[0].trim() === "https";
   return new URL(req.url).protocol === "https:";
+}
+
+/** "<proto>://<host>" the browser used for this request (same rules as page-data › requestOrigin). */
+export function originOf(req: Request): string {
+  return `${isHttps(req) ? "https" : "http"}://${requestHost(req)}`;
 }
 
 export function readCookie(req: Request, name: string): string | undefined {

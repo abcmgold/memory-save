@@ -26,11 +26,13 @@ export const users = pgTable(
   "users",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    username: text("username").notNull().unique(), // private: login only (FR-038)
+    username: text("username").unique(), // private: login only (FR-038); null for Google accounts (002)
     handle: text("handle").notNull().unique(), // public, system-generated, fixed (FR-037)
     inviteToken: text("invite_token").notNull().unique(), // current friend-invite link secret (FR-039)
     displayName: text("display_name").notNull(), // required since rev 3.1 (FR-001)
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"), // null for Google accounts (002)
+    googleSub: text("google_sub").unique(), // 002 data-model.md › users.google_sub — Google's stable account id
+    googleEmail: text("google_email"), // 002 data-model.md › users.google_email — shown to its owner only
     lastAudience: jsonb("last_audience")
       .$type<LastAudience>()
       .notNull()
@@ -38,6 +40,12 @@ export const users = pgTable(
     createdAt: createdAt(),
   },
   (t) => [
+    // 002: exactly one way to sign in — username + password, or Google
+    check(
+      "users_one_login_method",
+      sql`(${t.username} IS NOT NULL AND ${t.passwordHash} IS NOT NULL AND ${t.googleSub} IS NULL) OR (${t.googleSub} IS NOT NULL AND ${t.username} IS NULL AND ${t.passwordHash} IS NULL)`,
+    ),
+    check("users_google_email_length", sql`${t.googleEmail} IS NULL OR char_length(${t.googleEmail}) <= 320`),
     check("users_username_format", sql`${t.username} ~ '^[a-z0-9_]{3,30}$'`),
     // String.raw keeps the backslashes so Postgres sees "\." (a literal dot), not "." (any character).
     check("users_handle_format", sql.raw(String.raw`"handle" ~ '^[a-z0-9]+(\.[a-z0-9]+)*\.[0-9]{4,6}$' AND char_length("handle") <= 32`)),
@@ -57,6 +65,21 @@ export const sessions = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("sessions_user_idx").on(t.userId)],
+);
+
+// 002 data-model.md › pending_google_signups — Google verified the person, display name not confirmed yet
+export const pendingGoogleSignups = pgTable(
+  "pending_google_signups",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    googleSub: text("google_sub").notNull(),
+    googleEmail: text("google_email").notNull(),
+    suggestedName: text("suggested_name").notNull(),
+    next: text("next"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("pending_google_signups_expires_idx").on(t.expiresAt)],
 );
 
 // data-model.md › login_attempts
@@ -180,5 +203,6 @@ export const entryAudience = pgTable(
 );
 
 export type UserRow = typeof users.$inferSelect;
+export type PendingGoogleSignupRow = typeof pendingGoogleSignups.$inferSelect;
 export type EntryRow = typeof entries.$inferSelect;
 export type PhotoRow = typeof photos.$inferSelect;

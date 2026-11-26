@@ -3,7 +3,7 @@
 Nhật ký hằng ngày và chia sẻ khoảnh khắc với bạn bè: viết nhật ký kèm ảnh, xem lại theo timeline,
 đăng nhanh bằng camera, kết bạn bằng tên đăng nhập và chọn ai được xem từng bài.
 
-- Spec, plan, API: [`specs/001-daily-journal/`](specs/001-daily-journal/)
+- Spec, plan, API: [`specs/001-daily-journal/`](specs/001-daily-journal/) · Đăng nhập Google: [`specs/002-google-login/`](specs/002-google-login/)
 - Thiết kế giao diện: https://claude.ai/artifact/R54gKMFCQv1fsT3R8xAz9o
 - Nguyên tắc dự án: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
 
@@ -20,6 +20,10 @@ Dùng Postgres nhúng (PGlite) và lưu ảnh trong `~/.memorysave-local/` (ngo�
 `npm run seed:local` ở terminal khác khi server đang chạy. Làm lại từ đầu: dừng server rồi xóa
 `~/.memorysave-local/` (đừng xóa khi server đang chạy).
 Chế độ này tự chặn khi chạy production. Camera hoạt động trên `localhost`.
+
+**Đăng nhập bằng Google (tùy chọn)**: thêm `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET` vào `.env.local` (cách tạo:
+[`docs/DEPLOY.md`](docs/DEPLOY.md) mục 3.1, redirect URI `http://localhost:3000/api/auth/google/callback`) rồi khởi
+động lại server. Không có hai biến này thì nút Google tự ẩn. Tắt server bằng **Ctrl+C** để DB local được đóng đúng cách.
 
 ## Kiểm thử
 

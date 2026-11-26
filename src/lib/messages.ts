@@ -11,6 +11,7 @@ export type ErrorCode =
   | "UNSUPPORTED_TYPE"
   | "RULE"
   | "RATE_LIMITED"
+  | "GONE"
   | "INTERNAL";
 
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
@@ -41,6 +42,13 @@ export const msg = {
   invalidCredentials: "Tên đăng nhập hoặc mật khẩu không đúng.",
   rateLimited: "Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.",
 
+  // Google login (002)
+  googleContinue: "Tiếp tục với Google",
+  googleCancelled: "Bạn đã hủy đăng nhập bằng Google.",
+  googleFailed: "Không đăng nhập được bằng Google. Vui lòng thử lại.",
+  googleUnverified: "Email Google này chưa được xác minh nên không dùng để đăng nhập được.",
+  googleExpired: "Phiên đăng ký bằng Google đã hết hạn. Vui lòng thử lại.",
+
   // entries
   titleTooLong: `Tiêu đề tối đa ${MAX_TITLE} ký tự.`,
   bodyTooLong: `Nội dung tối đa ${MAX_BODY.toLocaleString("vi-VN")} ký tự.`,
@@ -65,3 +73,16 @@ export const msg = {
   cannotFriendSelf: "Bạn không thể kết bạn với chính mình.",
   audienceNotFriend: "Chỉ có thể chia sẻ cho người đang là bạn bè.",
 } as const;
+
+/** `/login?error=<code>` values set by the Google flow (002 research R9); anything else is ignored. */
+export const GOOGLE_LOGIN_ERRORS = {
+  google_cancelled: msg.googleCancelled,
+  google_failed: msg.googleFailed,
+  google_unverified: msg.googleUnverified,
+  google_expired: msg.googleExpired,
+} as const;
+export type GoogleLoginError = keyof typeof GOOGLE_LOGIN_ERRORS;
+
+export function googleLoginErrorMessage(code: string | undefined): string | null {
+  return code && Object.hasOwn(GOOGLE_LOGIN_ERRORS, code) ? GOOGLE_LOGIN_ERRORS[code as GoogleLoginError] : null;
+}

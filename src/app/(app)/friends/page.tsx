@@ -29,10 +29,17 @@ export default async function FriendsPage() {
       <main className="flex flex-1 flex-col gap-6 px-4 pt-[18px] pb-6">
         <InviteLinkCard initialUrl={inviteUrl(origin, token)} handle={user.handle} />
         <FriendsPanel initial={overview} />
-        <p className="text-center text-xs font-medium text-muted">
-          Tên đăng nhập của bạn (<span className="font-bold">{user.username}</span>) chỉ dùng để đăng nhập — không ai
-          khác thấy.
-        </p>
+        {user.username ? (
+          <p className="text-center text-xs font-medium text-muted">
+            Tên đăng nhập của bạn (<span className="font-bold">{user.username}</span>) chỉ dùng để đăng nhập — không ai
+            khác thấy.
+          </p>
+        ) : (
+          <p className="text-center text-xs font-medium break-words text-muted">
+            Bạn đăng nhập bằng Google (<span className="font-bold">{user.googleEmail}</span>) — không ai khác thấy email
+            này.
+          </p>
+        )}
       </main>
     </>
   );

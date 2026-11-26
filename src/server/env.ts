@@ -9,6 +9,9 @@ const EnvSchema = z.object({
   R2_BUCKET: z.string().min(1, "R2_BUCKET is required"),
   APP_TIMEZONE: z.string().default("Asia/Ho_Chi_Minh"),
   CRON_SECRET: z.string().min(16, "CRON_SECRET must be at least 16 characters"),
+  // Optional (002-google-login): the Google button is shown only when both are set.
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -51,6 +54,13 @@ export function getEnv(): Env {
 
 function stripEmpty(env: NodeJS.ProcessEnv): Record<string, string> {
   return Object.fromEntries(Object.entries(env).filter(([, v]) => v !== undefined && v !== "")) as Record<string, string>;
+}
+
+/** Google OAuth client, or null when not configured (research R7). Reads process.env directly; never throws. */
+export function getGoogleConfig(): { clientId: string; clientSecret: string } | null {
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+  return clientId && clientSecret ? { clientId, clientSecret } : null;
 }
 
 /** Time zone is needed by pure domain code and tests; it never throws. */

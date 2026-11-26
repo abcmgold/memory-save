@@ -11,7 +11,8 @@ const DAY_MS = 86_400_000;
 
 export type SessionUser = {
   id: string;
-  username: string; // only ever shown to its owner
+  username: string | null; // only ever shown to its owner; null for Google accounts (002)
+  googleEmail: string | null; // only ever shown to its owner (002 FR-G09)
   handle: string;
   displayName: string | null;
   lastAudience: schema.LastAudience;
@@ -38,6 +39,7 @@ export async function getSessionUser(token: string | undefined): Promise<Session
       expiresAt: schema.sessions.expiresAt,
       id: schema.users.id,
       username: schema.users.username,
+      googleEmail: schema.users.googleEmail,
       handle: schema.users.handle,
       displayName: schema.users.displayName,
       lastAudience: schema.users.lastAudience,
@@ -54,7 +56,7 @@ export async function getSessionUser(token: string | undefined): Promise<Session
       .set({ expiresAt: new Date(Date.now() + SESSION_DAYS * DAY_MS) })
       .where(eq(schema.sessions.tokenHash, tokenHash));
   }
-  return { id: row.id, username: row.username, handle: row.handle, displayName: row.displayName, lastAudience: row.lastAudience };
+  return { id: row.id, username: row.username, googleEmail: row.googleEmail, handle: row.handle, displayName: row.displayName, lastAudience: row.lastAudience };
 }
 
 export async function deleteSession(token: string | undefined): Promise<void> {

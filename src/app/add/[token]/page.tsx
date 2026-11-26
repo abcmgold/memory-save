@@ -7,6 +7,8 @@ import { Avatar } from "@/components/ui/primitives";
 import { UsersIcon } from "@/components/ui/icons";
 import { msg } from "@/lib/messages";
 import { AcceptInvite } from "./AcceptInvite";
+import { GoogleButton } from "@/components/ui/GoogleButton";
+import { getGoogleConfig } from "@/server/env";
 
 export const metadata = { title: "Lời mời kết bạn · MemorySave", robots: { index: false } };
 
@@ -51,6 +53,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
               <Link href={`/login?next=/add/${token}`} className={buttonClass("secondary", "lg")}>
                 Tôi đã có tài khoản
               </Link>
+              {getGoogleConfig() && <GoogleButton next={`/add/${token}`} />}
             </div>
           )}
           {invite.status === "self" && (

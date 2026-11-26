@@ -49,5 +49,12 @@ export async function runCleanup() {
     removedOrphanObjects: orphanIds.length,
     removedSessions: await deleteExpiredSessions(),
     removedLoginAttempts: await deleteOldAttempts(),
+    removedPendingGoogleSignups: (
+      await db
+        .delete(schema.pendingGoogleSignups)
+        .where(lt(schema.pendingGoogleSignups.expiresAt, new Date()))
+        .returning({ t: schema.pendingGoogleSignups.tokenHash })
+    ).length, // 002 data-model.md › pending_google_signups lifecycle
+
   };
 }

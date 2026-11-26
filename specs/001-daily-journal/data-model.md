@@ -6,6 +6,9 @@ Quyết định nền tảng: xem [research.md](./research.md) R3, R5–R8, R10.
 
 ## users
 
+> **Mở rộng ở 002-google-login**: `username`/`password_hash` có thể null (tài khoản Google), thêm `google_sub`,
+> `google_email` và bảng `pending_google_signups` — xem [002 data-model](../002-google-login/data-model.md).
+
 | Cột | Kiểu | Ràng buộc / ghi chú |
 |---|---|---|
 | id | uuid PK | |
