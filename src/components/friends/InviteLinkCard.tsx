@@ -10,7 +10,7 @@ const noSubscribe = () => () => {};
 /**
  * Whether the Web Share API exists. The server (and the hydration pass) always say false so the HTML matches;
  * React then re-renders with the browser's real answer. Reading `navigator` during render caused a hydration
- * mismatch that made the dev server reload /friends in a loop.
+ * mismatch that made the dev server reload the page in a loop.
  */
 function useCanShare(): boolean {
   return useSyncExternalStore(

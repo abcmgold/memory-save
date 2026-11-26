@@ -95,7 +95,7 @@ export function AudiencePicker({
         {friends.length === 0 && (
           <p className="truncate text-[13px] font-medium text-muted">
             Chưa có bạn bè nên chỉ bạn xem được ·{" "}
-            <Link href="/friends" className="font-extrabold text-ink underline underline-offset-2">
+            <Link href="/me" className="font-extrabold text-ink underline underline-offset-2">
               Thêm bạn
             </Link>
           </p>
@@ -164,7 +164,7 @@ export function AudiencePicker({
       {friends.length === 0 ? (
         <p className="text-sm font-medium text-muted">
           Bạn chưa có bạn bè nên chỉ mình bạn xem được.{" "}
-          <Link href="/friends" className="font-extrabold text-ink underline underline-offset-2">
+          <Link href="/me" className="font-extrabold text-ink underline underline-offset-2">
             Thêm bạn
           </Link>
         </p>

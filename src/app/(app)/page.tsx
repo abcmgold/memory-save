@@ -25,7 +25,7 @@ export default async function CameraHome() {
         MemorySave
       </span>
       <Link
-        href="/friends"
+        href="/me"
         aria-label={incoming ? `Bạn bè, ${incoming} lời mời mới` : "Bạn bè"}
         className="relative flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-white shadow-brutal"
       >

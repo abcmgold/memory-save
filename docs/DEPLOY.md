@@ -134,7 +134,7 @@ Mở tên miền trên **điện thoại** (có HTTPS nên camera dùng được
 - [ ] (Nếu bật Google) Bấm "Tiếp tục với Google" → xác nhận tên hiển thị → vào trang chính
 - [ ] Viết bài kèm ảnh từ thư viện — thấy tiến trình tải, ảnh hiện đúng chiều
 - [ ] Đăng nhanh bằng camera, đổi camera trước/sau
-- [ ] Trang Bạn bè → sao chép link kết bạn → mở ở tài khoản kia → tự thành bạn
+- [ ] Tab Cá nhân → sao chép link kết bạn → mở ở tài khoản kia → tự thành bạn
 - [ ] Đăng bài "Tất cả bạn bè" → tài khoản kia thấy trong tab Khoảnh khắc
 - [ ] Vercel → Settings → **Cron Jobs** → bấm **Run** cho `/api/cron/cleanup` → trả về 200
 - [ ] Mở thẳng một URL ảnh `https://<account>.r2.cloudflarestorage.com/memorysave-photos/...` → bị từ chối (bucket private)

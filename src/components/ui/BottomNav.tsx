@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookIcon, CameraIcon, MomentsIcon, PenIcon, UsersIcon } from "./icons";
+import { BookIcon, CameraIcon, MomentsIcon, PenIcon, UserIcon } from "./icons";
 
 const items = [
   { href: "/journal", label: "Nhật ký", Icon: BookIcon, match: (p: string) => p.startsWith("/journal") && p !== "/journal/new" },
   { href: "/moments", label: "Khoảnh khắc", Icon: MomentsIcon, match: (p: string) => p.startsWith("/moments") },
   { href: "/", label: "Chụp", Icon: CameraIcon, match: (p: string) => p === "/" },
   { href: "/journal/new", label: "Viết", Icon: PenIcon, match: (p: string) => p === "/journal/new" },
-  { href: "/friends", label: "Bạn bè", Icon: UsersIcon, match: (p: string) => p.startsWith("/friends") },
+  { href: "/me", label: "Cá nhân", Icon: UserIcon, match: (p: string) => p.startsWith("/me") },
 ];
 
 export function BottomNav({ incomingCount = 0 }: { incomingCount?: number }) {
@@ -21,7 +21,7 @@ export function BottomNav({ incomingCount = 0 }: { incomingCount?: number }) {
     >
       {items.map(({ href, label, Icon, match }) => {
         const active = match(pathname);
-        const showBadge = href === "/friends" && incomingCount > 0;
+        const showBadge = href === "/me" && incomingCount > 0;
         return (
           <Link
             key={href}

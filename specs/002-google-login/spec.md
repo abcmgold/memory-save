@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-25
 
-**Status**: Draft (rev 2 — bỏ liên kết tài khoản cũ; người mới xác nhận tên hiển thị trước khi tạo tài khoản)
+**Status**: Draft (rev 3 — trang Cá nhân `/me` không hiển thị cách đăng nhập; rev 2 — bỏ liên kết tài khoản cũ; người mới xác nhận tên hiển thị trước khi tạo tài khoản)
 
 **Input**: User description: "Thêm tính năng đăng nhập bằng Google cho MemorySave. Người dùng có thể đăng
 nhập/đăng ký bằng tài khoản Google bên cạnh cách đăng nhập bằng tên đăng nhập + mật khẩu hiện có. Luồng mời kết
@@ -82,8 +82,8 @@ xác nhận tên; kiểm tra người mới và A đã là bạn của nhau.
   từ chối, không đăng nhập ai, đưa về trang đăng nhập với thông báo "thử lại".
 - Người dùng đang đăng nhập mà mở trang đăng nhập: được chuyển về trang chính như hiện nay, không đổi tài khoản ngầm.
 - Google tạm thời không phản hồi: báo lỗi tiếng Việt, không tạo tài khoản dở dang.
-- Tài khoản tạo qua Google không có tên đăng nhập: trang Bạn bè hiển thị "Bạn đăng nhập bằng Google (email) — không ai
-  khác thấy email này" thay cho câu "Tên đăng nhập của bạn (...)".
+- Tài khoản tạo qua Google không có tên đăng nhập: trang Cá nhân (`/me`) không hiển thị cách đăng nhập cho bất kỳ loại
+  tài khoản nào (rev 3).
 - Bấm Bắt đầu hai lần, hoặc hai tab cùng hoàn tất bước tên cho cùng một tài khoản Google: chỉ đúng một tài khoản
   MemorySave được tạo; lần sau vào tài khoản đã tạo.
 - Người có tài khoản mật khẩu cũ bấm nút Google: được coi là người mới và tạo một tài khoản riêng (xem Assumptions);
@@ -118,8 +118,9 @@ xác nhận tên; kiểm tra người mới và A đã là bạn của nhau.
 
 **Quyền riêng tư**
 
-- **FR-G09**: Chủ tài khoản tạo qua Google MUST thấy email Google của mình ở trang Bạn bè; email Google MUST NOT xuất
-  hiện trong bất kỳ màn hình hay phản hồi nào gửi cho người khác (cùng mức bảo vệ như tên đăng nhập, FR-038).
+- **FR-G09**: Email Google chỉ được trả cho chính chủ tài khoản (`GET /api/me`) và MUST NOT xuất hiện trong bất kỳ màn
+  hình hay phản hồi nào gửi cho người khác (cùng mức bảo vệ như tên đăng nhập, FR-038). (rev 3: không còn hiển thị trên
+  trang Cá nhân.)
 
 **Tương thích**
 

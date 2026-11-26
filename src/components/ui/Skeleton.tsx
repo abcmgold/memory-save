@@ -110,9 +110,10 @@ export function MomentsSkeleton() {
 
 export function FriendsSkeleton() {
   return (
-    <Shell label="Đang tải bạn bè…">
-      <PageHeader title="Bạn bè" tone="mint" sticky={false} right={<Bone className="h-11 w-28" />} />
+    <Shell label="Đang tải trang cá nhân…">
+      <PageHeader title="Cá nhân" tone="mint" sticky={false} right={<Bone className="h-11 w-28" />} />
       <div className="flex flex-col gap-6 px-4 pt-[18px]">
+        <Bone className="h-[92px] w-full rounded-2xl" />
         <Bone className="h-[190px] w-full rounded-2xl bg-[#f6e7a8]" />
         <Bone className="h-[104px] w-full rounded-2xl" />
         <div className="flex flex-col gap-2.5">

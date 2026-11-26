@@ -37,7 +37,7 @@ export default async function MomentsPage() {
               <p className="text-base font-semibold text-body">
                 Chưa có khoảnh khắc nào được chia sẻ với bạn. Kết bạn với người thân để xem khoảnh khắc của nhau nhé.
               </p>
-              <Link href="/friends" className={buttonClass("primary", "md")}>
+              <Link href="/me" className={buttonClass("primary", "md")}>
                 Thêm bạn bè
               </Link>
             </div>

@@ -59,8 +59,8 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
           {invite.status === "self" && (
             <div className="mt-4 flex flex-col items-center gap-4">
               <p className="font-semibold">{msg.inviteSelf} Gửi link này cho người thân để kết bạn.</p>
-              <Link href="/friends" className={buttonClass("primary", "md")}>
-                Về trang Bạn bè
+              <Link href="/me" className={buttonClass("primary", "md")}>
+                Xem bạn bè của tôi
               </Link>
             </div>
           )}
