@@ -1,9 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { api, ApiError } from "@/lib/api-client";
+
+const noSubscribe = () => () => {};
+
+/**
+ * Whether the Web Share API exists. The server (and the hydration pass) always say false so the HTML matches;
+ * React then re-renders with the browser's real answer. Reading `navigator` during render caused a hydration
+ * mismatch that made the dev server reload /friends in a loop.
+ */
+function useCanShare(): boolean {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => typeof navigator.share === "function",
+    () => false,
+  );
+}
 
 /** "Link kết bạn": copy / share / create a new one (FR-039). */
 export function InviteLinkCard({ initialUrl, handle }: { initialUrl: string; handle: string }) {
@@ -11,7 +26,7 @@ export function InviteLinkCard({ initialUrl, handle }: { initialUrl: string; han
   const [notice, setNotice] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
+  const canShare = useCanShare();
 
   async function copy(text: string, what: string) {
     try {
