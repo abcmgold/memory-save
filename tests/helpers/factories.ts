@@ -1,11 +1,19 @@
-import { registerUser, type UserRef } from "@/server/services/auth";
+import { hashPassword, insertUser, toUserRef, type UserRef } from "@/server/services/auth";
 import { createSession, SESSION_COOKIE } from "@/server/services/sessions";
 import { getDb, schema } from "@/server/db/client";
 
 export type TestUser = UserRef & { cookie: string };
 
-export async function createUser(username: string, displayName = "Người dùng thử"): Promise<TestUser> {
-  const user = await registerUser({ username, password: "matkhau123", displayName });
+/** A password account (password "matkhau123"), signed in. Pass `email` to give it a verified e-mail (005). */
+export async function createUser(username: string, displayName = "Người dùng thử", email?: string): Promise<TestUser> {
+  const user = toUserRef(
+    await insertUser({
+      username,
+      passwordHash: await hashPassword("matkhau123"),
+      displayName,
+      ...(email ? { email, emailVerifiedAt: new Date() } : {}),
+    }),
+  );
   const { token } = await createSession(user.id);
   return { ...user, cookie: `${SESSION_COOKIE}=${token}` };
 }

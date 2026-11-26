@@ -4,7 +4,6 @@ import { hash, verify } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { getDb, schema, type DbOrTx } from "../db/client";
 import { errors } from "../http/errors";
-import { msg } from "@/lib/messages";
 import type { UserRef } from "@/lib/types";
 import { normalizeUsername } from "../domain/username";
 import { formatHandle, handleBase } from "../domain/handle";
@@ -36,24 +35,9 @@ const ARGON_OPTS = { algorithm: 2 as const };
 // Used to spend the same time when the username does not exist (no user enumeration by timing).
 let dummyHash: string | null = null;
 
-export async function registerUser(input: {
-  username: string;
-  password: string;
-  displayName: string;
-}): Promise<UserRef> {
-  const username = normalizeUsername(input.username);
-  const displayName = input.displayName.trim(); // required (FR-001, rev 3.1)
-  const db = getDb();
-  const existing = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.username, username));
-  if (existing.length > 0) throw errors.conflict(msg.usernameTaken);
-  const passwordHash = await hash(input.password, ARGON_OPTS);
-  try {
-    return toUserRef(await insertUser({ username, passwordHash, displayName }));
-  } catch (err) {
-    const { code, constraint } = pgError(err);
-    if (code === "23505" && constraint === "users_username_unique") throw errors.conflict(msg.usernameTaken);
-    throw err;
-  }
+/** Argon2id hash for a new password (sign-up, password reset). */
+export function hashPassword(password: string): Promise<string> {
+  return hash(password, ARGON_OPTS);
 }
 
 type NewUser = Omit<typeof schema.users.$inferInsert, "id" | "handle" | "inviteToken"> & { displayName: string };

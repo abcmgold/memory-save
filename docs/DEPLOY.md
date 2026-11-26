@@ -124,14 +124,39 @@ Bỏ qua mục này thì app chạy bình thường, chỉ không có nút "Ti�
 > Redirect URI lấy theo tên miền đang mở app. Bản **preview** của Vercel có tên miền khác, nên đăng nhập Google ở
 > preview sẽ báo `redirect_uri_mismatch` trừ khi bạn thêm URI của preview đó vào bước 3.
 
+### 3.2 Gửi mã xác thực qua Gmail (cần cho đăng ký, thêm email, quên mật khẩu)
+
+Thiếu mục này thì đăng nhập vẫn chạy, nhưng **đăng ký bằng tên đăng nhập, thêm/đổi email và quên mật khẩu** báo
+"Tính năng gửi mã tạm thời chưa dùng được". Làm xong mục này **trước** khi deploy bản có 005.
+
+1. Dùng một tài khoản Gmail (nên tạo riêng, vd `memorysave.app@gmail.com`). Bật **Xác minh 2 bước** ở
+   myaccount.google.com → Bảo mật.
+2. Vào myaccount.google.com/apppasswords → tạo **Mật khẩu ứng dụng** tên "MemorySave" → chép chuỗi 16 ký tự.
+3. Thêm biến môi trường trên Vercel rồi **Redeploy**:
+
+| Tên | Giá trị |
+|---|---|
+| `SMTP_USER` | địa chỉ Gmail ở bước 1 |
+| `SMTP_PASS` | mật khẩu ứng dụng 16 ký tự (có hay không có dấu cách đều được) |
+| `MAIL_FROM_NAME` | (tuỳ chọn) tên người gửi, mặc định `MemorySave` |
+
+> Gmail cho gửi khoảng 500 thư/ngày — thừa cho app gia đình. Thư đầu tiên có thể vào **Spam/Quảng cáo**: mở thư, bấm
+> "Không phải thư rác" để các thư sau vào hộp chính. Đổi mật khẩu Gmail sẽ làm mật khẩu ứng dụng mất hiệu lực — tạo lại
+> và cập nhật `SMTP_PASS`.
+
 ---
 
 ## 4. Kiểm tra sau khi deploy
 
 Mở tên miền trên **điện thoại** (có HTTPS nên camera dùng được):
 
-- [ ] Đăng ký 2 tài khoản (2 trình duyệt hoặc 1 cửa sổ ẩn danh)
+- [ ] Đăng ký 2 tài khoản (2 trình duyệt hoặc 1 cửa sổ ẩn danh) — mỗi lần nhận thư có mã 6 số, nhập mã → vào app
 - [ ] (Nếu bật Google) Bấm "Tiếp tục với Google" → xác nhận tên hiển thị → vào trang chính
+- [ ] (Nếu bật Google) Đăng xuất tài khoản có email Gmail đã xác thực → "Tiếp tục với Google" bằng Gmail đó → vào đúng
+  tài khoản cũ, không hỏi tên
+- [ ] Trang đăng nhập → "Quên mật khẩu?" → nhận mã → đặt mật khẩu mới → thiết bị khác bị đăng xuất
+- [ ] Tài khoản cũ chưa có email → tab Cá nhân có cảnh báo vàng → thêm email → cảnh báo biến mất
+- [ ] Vercel → Logs: không có mã 6 số hay email nào bị ghi ra
 - [ ] Viết bài kèm ảnh từ thư viện — thấy tiến trình tải, ảnh hiện đúng chiều
 - [ ] Đăng nhanh bằng camera, đổi camera trước/sau
 - [ ] Tab Cá nhân → sao chép link kết bạn → mở ở tài khoản kia → tự thành bạn

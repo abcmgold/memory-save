@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "../db/client";
 import { getGoogleConfig } from "../env";
@@ -8,6 +8,7 @@ import { errors } from "../http/errors";
 import { isHttps, originOf, readCookie } from "../http/request";
 import { checkGoogleClaims, codeChallenge, suggestDisplayName } from "../domain/google-identity";
 import { authorizeUrl, getGoogleClient } from "./google-oauth";
+import { normalizeEmail } from "../domain/email-code";
 import { insertUser, pgError, toUserRef } from "./auth";
 import { createSession, sessionCookie } from "./sessions";
 import { msg, type GoogleLoginError } from "@/lib/messages";
@@ -126,17 +127,36 @@ export async function handleCallback(req: Request): Promise<RedirectResult> {
   const { sub, email, name } = checked.identity;
 
   const db = getDb();
-  const [existing] = await db
-    .select({ id: schema.users.id, googleEmail: schema.users.googleEmail })
-    .from(schema.users)
-    .where(eq(schema.users.googleSub, sub));
-  if (existing) {
-    if (existing.googleEmail !== email) {
-      await db.update(schema.users).set({ googleEmail: email }).where(eq(schema.users.id, existing.id));
-    }
-    const session = await createSession(existing.id);
+  const signIn = async (userId: string): Promise<RedirectResult> => {
+    const session = await createSession(userId);
     cookies.push(sessionCookie(session.token, session.expiresAt, secure));
     return { location: next ?? HOME_PATH, cookies };
+  };
+
+  // 005 research R8, FR-E09 — (1) this Google account is linked. The account's e-mail is the one its owner verified;
+  // Google never overwrites it.
+  const bySub = async () =>
+    (await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.googleSub, sub)))[0];
+  const existing = await bySub();
+  if (existing) return signIn(existing.id);
+
+  // (2) An account whose *verified* e-mail is this (Google-verified) e-mail: link Google to it, unless (3) it is
+  // already linked to another Google account. `users.email` only ever holds verified addresses (FR-E01).
+  const [byEmail] = await db
+    .select({ id: schema.users.id, googleSub: schema.users.googleSub })
+    .from(schema.users)
+    .where(eq(schema.users.email, normalizeEmail(email)));
+  if (byEmail) {
+    if (byEmail.googleSub) return fail("google_conflict", "e-mail linked to another Google account");
+    const linked = await db
+      .update(schema.users)
+      .set({ googleSub: sub })
+      .where(and(eq(schema.users.id, byEmail.id), isNull(schema.users.googleSub)))
+      .returning({ id: schema.users.id });
+    if (linked.length) return signIn(byEmail.id);
+    const raced = await bySub(); // linked from another tab in the meantime
+    if (raced) return signIn(raced.id);
+    return fail("google_conflict", "e-mail linked to another Google account");
   }
 
   // New person: Google is sure who they are, the account waits for a confirmed display name (FR-G03).
@@ -189,13 +209,24 @@ export async function completeSignup(
         .returning();
       if (!pending) throw errors.gone(msg.googleExpired);
       const user = await insertUser(
-        { googleSub: pending.googleSub, googleEmail: pending.googleEmail, displayName: displayName.trim() },
+        {
+          googleSub: pending.googleSub,
+          // 005 data-model.md › users.email, users.email_verified_at — Google verified it (FR-E09 step 4)
+          email: normalizeEmail(pending.googleEmail),
+          emailVerifiedAt: new Date(),
+          displayName: displayName.trim(),
+        },
         tx,
       );
       return { user: toUserRef(user), next: safeNext(pending.next), created: true };
     });
   } catch (err) {
     const { code, constraint } = pgError(err);
+    // 005 research R8: the Google e-mail was verified by another account in the meantime → 409; Google again matches it.
+    if (pending && code === "23505" && constraint === "users_email_unique") {
+      await db.delete(schema.pendingGoogleSignups).where(eq(schema.pendingGoogleSignups.tokenHash, tokenHash));
+      throw errors.conflict(msg.googleEmailTaken);
+    }
     if (!pending || code !== "23505" || constraint !== "users_google_sub_unique") throw err;
     // The transaction rolled back; consume the row now and use the account the other tab created.
     await db.delete(schema.pendingGoogleSignups).where(eq(schema.pendingGoogleSignups.tokenHash, tokenHash));

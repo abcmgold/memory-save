@@ -4,10 +4,11 @@ Nhật ký hằng ngày và chia sẻ khoảnh khắc với bạn bè: viết nh
 đăng nhanh bằng camera, kết bạn bằng tên đăng nhập và chọn ai được xem từng bài.
 
 - Spec, plan, API: [`specs/001-daily-journal/`](specs/001-daily-journal/) · Đăng nhập Google: [`specs/002-google-login/`](specs/002-google-login/)
+  · Email xác thực + quên mật khẩu: [`specs/005-email-verification/`](specs/005-email-verification/)
 - Thiết kế giao diện: https://claude.ai/artifact/R54gKMFCQv1fsT3R8xAz9o
 - Nguyên tắc dự án: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
 
-**Trang**: `/` giới thiệu công khai · `/login` đăng nhập/đăng ký · `/camera` Chụp (trang chính trong app) · `/journal`
+**Trang**: `/` giới thiệu công khai · `/login` đăng nhập/đăng ký · `/forgot-password` quên mật khẩu · `/camera` Chụp (trang chính trong app) · `/journal`
 Nhật ký · `/moments` Khoảnh khắc · `/me` Cá nhân · `/add/<token>` link kết bạn. Route luôn đặt bằng tiếng Anh.
 
 **Công nghệ**: Next.js 16 (App Router) · PostgreSQL (Neon) + Drizzle · Cloudflare R2 (ảnh) · Tailwind CSS v4 · Vitest.
@@ -27,6 +28,10 @@ Chế độ này tự chặn khi chạy production. Camera hoạt động trên 
 **Đăng nhập bằng Google (tùy chọn)**: thêm `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET` vào `.env.local` (cách tạo:
 [`docs/DEPLOY.md`](docs/DEPLOY.md) mục 3.1, redirect URI `http://localhost:3000/api/auth/google/callback`) rồi khởi
 động lại server. Không có hai biến này thì nút Google tự ẩn. Tắt server bằng **Ctrl+C** để DB local được đóng đúng cách.
+
+**Mã xác thực email**: ở chế độ local, thư không được gửi thật — mã 6 số được in ra terminal đang chạy server (dòng
+`[mail] to=… subject=123456 là mã MemorySave của bạn`). Muốn thử gửi thật: đặt `SMTP_USER`, `SMTP_PASS` và
+`MAIL_TRANSPORT=smtp` trong `.env.local` (cách tạo: [`docs/DEPLOY.md`](docs/DEPLOY.md) mục 3.2).
 
 ## Kiểm thử
 
@@ -77,7 +82,8 @@ Khôi phục chỉ chạy vào database **trống** và không đụng dữ li�
 
 ## Quyền riêng tư (tóm tắt)
 
-- Tên đăng nhập chỉ dùng để đăng nhập, không ai khác thấy; kết bạn bằng mã định danh công khai (vd `an.nguyen.4821`)
+- Tên đăng nhập và email chỉ chủ tài khoản thấy; email chỉ được lưu sau khi xác thực bằng mã, và đăng nhập Google chỉ
+  vào tài khoản có cùng email đã xác thực. Kết bạn bằng mã định danh công khai (vd `an.nguyen.4821`)
   hoặc link kết bạn (đổi link bất kỳ lúc nào để vô hiệu link cũ).
 - Bài mới mặc định "Chỉ mình tôi"; chỉ chia sẻ được cho bạn bè; hủy kết bạn thu hồi quyền xem hai chiều.
 - Mọi lần xem bài/ảnh đều kiểm tra quyền ở server; không có quyền → 404.

@@ -25,7 +25,7 @@ export async function setupTestDb(): Promise<Db> {
 export async function resetTestDb(): Promise<void> {
   if (!db) return;
   await db.execute(
-    sql`TRUNCATE entry_audience, photos, entries, friendships, friend_requests, login_attempts, sessions, pending_google_signups, users CASCADE`,
+    sql`TRUNCATE entry_audience, photos, entries, friendships, friend_requests, login_attempts, sessions, pending_google_signups, email_codes, email_sends, users CASCADE`,
   );
 }
 

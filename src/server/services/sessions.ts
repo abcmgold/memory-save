@@ -1,7 +1,7 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt, lt } from "drizzle-orm";
-import { getDb, schema } from "../db/client";
+import { getDb, schema, type DbOrTx } from "../db/client";
 import { SESSION_COOKIE } from "@/lib/session-cookie";
 
 // data-model.md › sessions ; research.md R4
@@ -13,7 +13,7 @@ const DAY_MS = 86_400_000;
 export type SessionUser = {
   id: string;
   username: string | null; // only ever shown to its owner; null for Google accounts (002)
-  googleEmail: string | null; // only ever shown to its owner (002 FR-G09)
+  email: string | null; // verified e-mail, only ever shown to its owner (005 FR-E15)
   handle: string;
   displayName: string | null;
   lastAudience: schema.LastAudience;
@@ -40,7 +40,7 @@ export async function getSessionUser(token: string | undefined): Promise<Session
       expiresAt: schema.sessions.expiresAt,
       id: schema.users.id,
       username: schema.users.username,
-      googleEmail: schema.users.googleEmail,
+      email: schema.users.email,
       handle: schema.users.handle,
       displayName: schema.users.displayName,
       lastAudience: schema.users.lastAudience,
@@ -57,7 +57,12 @@ export async function getSessionUser(token: string | undefined): Promise<Session
       .set({ expiresAt: new Date(Date.now() + SESSION_DAYS * DAY_MS) })
       .where(eq(schema.sessions.tokenHash, tokenHash));
   }
-  return { id: row.id, username: row.username, googleEmail: row.googleEmail, handle: row.handle, displayName: row.displayName, lastAudience: row.lastAudience };
+  return { id: row.id, username: row.username, email: row.email, handle: row.handle, displayName: row.displayName, lastAudience: row.lastAudience };
+}
+
+/** Signs a user out everywhere (005 password reset, FR-E12). */
+export async function deleteUserSessions(userId: string, db: DbOrTx = getDb()): Promise<void> {
+  await db.delete(schema.sessions).where(eq(schema.sessions.userId, userId));
 }
 
 export async function deleteSession(token: string | undefined): Promise<void> {

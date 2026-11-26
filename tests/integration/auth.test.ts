@@ -2,7 +2,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import { closeTestDb, resetTestDb, setupTestDb } from "../helpers/test-db";
 import { call, sessionCookieFrom } from "../helpers/request";
-import { POST as register } from "@/app/api/auth/register/route";
+import { installMemoryMailer } from "../helpers/memory-mailer";
+import { signUp as signUpFlow, signUpStart } from "../helpers/signup";
 import { POST as login } from "@/app/api/auth/login/route";
 import { POST as logout } from "@/app/api/auth/logout/route";
 import { GET as me } from "@/app/api/me/route";
@@ -15,13 +16,12 @@ describe("auth (contracts/api.md › Xác thực)", () => {
   beforeEach(resetTestDb);
   afterAll(closeTestDb);
 
+  // 005: sign-up is start → code by mail → verify (tests/helpers/signup.ts)
   const signUp = (username = "an_nguyen", password = "matkhau123", displayName: string | undefined = "An") =>
-    call(register, "POST", "/api/auth/register", { body: { username, password, displayName } });
+    signUpFlow(installMemoryMailer(), { username, password, displayName });
 
   it("requires a display name (FR-001, rev 3.1)", async () => {
-    const missing = await call(register, "POST", "/api/auth/register", {
-      body: { username: "an_nguyen", password: "matkhau123" },
-    });
+    const missing = await signUpStart({ username: "an_nguyen", password: "matkhau123", email: "an@example.com" });
     expect(missing.status).toBe(400);
     expect(missing.body.error.fields.displayName).toBeTruthy();
     for (const displayName of ["", "   "]) {
@@ -122,15 +122,10 @@ describe("auth (contracts/api.md › Xác thực)", () => {
   });
 
   it("rejects mutations without a matching Origin (CSRF)", async () => {
-    const res = await call(register, "POST", "/api/auth/register", {
-      body: { username: "an_nguyen", password: "matkhau123" },
-      origin: "https://evil.example",
-    });
+    const body = { username: "an_nguyen", password: "matkhau123", displayName: "An", email: "an@example.com" };
+    const res = await signUpStart(body, { origin: "https://evil.example" });
     expect(res.status).toBe(403);
-    const none = await call(register, "POST", "/api/auth/register", {
-      body: { username: "an_nguyen", password: "matkhau123" },
-      origin: null,
-    });
+    const none = await signUpStart(body, { origin: null });
     expect(none.status).toBe(403);
     const db = await setupTestDb();
     expect(await db.select().from(schema.users).where(eq(schema.users.username, "an_nguyen"))).toHaveLength(0);
@@ -141,7 +136,8 @@ describe("auth (contracts/api.md › Xác thực)", () => {
     const db = await setupTestDb();
     await db.insert(schema.users).values({
       googleSub: "google-sub-1",
-      googleEmail: "an@gmail.com",
+      email: "an@gmail.com",
+      emailVerifiedAt: new Date(),
       displayName: "An Google",
       handle: "an.google.1234",
       inviteToken: "google-invite-token-000000",

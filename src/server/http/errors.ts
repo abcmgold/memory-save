@@ -9,6 +9,8 @@ export class AppError extends Error {
     public code: ErrorCode,
     message: string,
     public fields?: Record<string, string>,
+    /** Extra machine-readable details, e.g. `attemptsLeft`, `retryAfter` (005 contracts/api.md). */
+    public extra?: Record<string, number>,
   ) {
     super(message);
     this.name = "AppError";
@@ -23,18 +25,30 @@ export const errors = {
   badOrigin: () => new AppError(403, "BAD_ORIGIN", msg.badOrigin),
   /** Used for both "does not exist" and "not allowed" — never reveal which (FR-031). */
   notFound: () => new AppError(404, "NOT_FOUND", msg.notFound),
-  conflict: (message: string) => new AppError(409, "CONFLICT", message),
+  conflict: (message: string, fields?: Record<string, string>) => new AppError(409, "CONFLICT", message, fields),
   tooLarge: (message: string = msg.photoTooLarge) => new AppError(413, "TOO_LARGE", message),
   unsupportedType: (message: string = msg.photoUnsupported) => new AppError(415, "UNSUPPORTED_TYPE", message),
   rule: (message: string, fields?: Record<string, string>) => new AppError(422, "RULE", message, fields),
-  rateLimited: () => new AppError(429, "RATE_LIMITED", msg.rateLimited),
+  rateLimited: (message: string = msg.rateLimited, retryAfter?: number) =>
+    new AppError(429, "RATE_LIMITED", message, undefined, retryAfter ? { retryAfter } : undefined),
   gone: (message: string) => new AppError(410, "GONE", message),
+  codeInvalid: (attemptsLeft: number) =>
+    new AppError(422, "CODE_INVALID", msg.codeInvalid(attemptsLeft), undefined, { attemptsLeft }),
+  mailUnavailable: () => new AppError(503, "MAIL_UNAVAILABLE", msg.mailUnavailable),
+  mailFailed: () => new AppError(502, "MAIL_FAILED", msg.mailFailed),
 };
 
 export function errorResponse(err: unknown): Response {
   if (err instanceof AppError) {
     return Response.json(
-      { error: { code: err.code, message: err.message, ...(err.fields ? { fields: err.fields } : {}) } },
+      {
+        error: {
+          code: err.code,
+          message: err.message,
+          ...(err.fields ? { fields: err.fields } : {}),
+          ...(err.extra ?? {}),
+        },
+      },
       { status: err.status, headers: { "Cache-Control": "no-store" } },
     );
   }

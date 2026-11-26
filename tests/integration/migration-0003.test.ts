@@ -32,7 +32,7 @@ describe("migration 0003 (Google login) on existing data", () => {
       values ('old_one', 'hash-1', 'Người Cũ', 'nguoi.cu.1234', 'token-old-one-0000000000');
     `);
 
-    await migrate(db, { migrationsFolder: ROOT });
+    await migrate(db, { migrationsFolder: folderWithFirstMigrations(4) }); // the state right after 0003 (0004 relaxes these rules)
 
     const old = await client.query<Record<string, unknown>>(
       "select username, password_hash, display_name, handle, google_sub, google_email from users",

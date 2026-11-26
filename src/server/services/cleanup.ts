@@ -4,6 +4,7 @@ import { getDb, schema } from "../db/client";
 import { allPhotoKeys, getPhotoStore } from "../storage/photo-store";
 import { deleteExpiredSessions } from "./sessions";
 import { deleteOldAttempts } from "./rate-limit";
+import { deleteExpiredCodes, deleteOldSends } from "./email-codes";
 
 // data-model.md › photos lifecycle: uploading|pending older than 24h → deleted; orphan objects → deleted.
 const STALE_HOURS = 24;
@@ -55,6 +56,8 @@ export async function runCleanup() {
         .where(lt(schema.pendingGoogleSignups.expiresAt, new Date()))
         .returning({ t: schema.pendingGoogleSignups.tokenHash })
     ).length, // 002 data-model.md › pending_google_signups lifecycle
+    removedEmailCodes: await deleteExpiredCodes(), // 005 data-model.md › email_codes lifecycle
+    removedEmailSends: await deleteOldSends(), // 005 data-model.md › email_sends
 
   };
 }

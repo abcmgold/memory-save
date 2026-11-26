@@ -78,4 +78,25 @@ describe("daily cleanup (contracts/api.md › Cron; data-model.md photo lifecycl
     const left = await db.select({ t: schema.pendingGoogleSignups.tokenHash }).from(schema.pendingGoogleSignups);
     expect(left).toEqual([{ t: "new" }]);
   });
+
+  it("removes long-expired e-mail codes and sends older than an hour (005)", async () => {
+    const db = getDb();
+    const minute = 60_000;
+    const at = (m: number) => new Date(Date.now() + m * minute);
+    const row = { purpose: "signup" as const, email: "a@x.com", codeHash: "c", delivery: "code" as const };
+    await db.insert(schema.emailCodes).values([
+      { ...row, ticketHash: "old", sentAt: at(-80), expiresAt: at(-70) },
+      { ...row, ticketHash: "recent", sentAt: at(-15), expiresAt: at(-5) }, // still revivable by "resend"
+      { ...row, ticketHash: "live", sentAt: at(0), expiresAt: at(10) },
+    ]);
+    await db.insert(schema.emailSends).values([
+      { email: "a@x.com", ip: "unknown", sentAt: at(-61) },
+      { email: "a@x.com", ip: "unknown", sentAt: at(-5) },
+    ]);
+    const res = await run(process.env.CRON_SECRET);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ removedEmailCodes: 1, removedEmailSends: 1 });
+    const left = (await db.select({ t: schema.emailCodes.ticketHash }).from(schema.emailCodes)).map((r) => r.t).sort();
+    expect(left).toEqual(["live", "recent"]);
+  });
 });

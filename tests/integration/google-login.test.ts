@@ -17,6 +17,7 @@ import { GET as start } from "@/app/api/auth/google/start/route";
 import { GET as callback } from "@/app/api/auth/google/callback/route";
 import { POST as complete } from "@/app/api/auth/google/complete/route";
 import { GET as me } from "@/app/api/me/route";
+import { POST as loginRoute } from "@/app/api/auth/login/route";
 import { GET as friends } from "@/app/api/friends/route";
 import { POST as acceptInvite } from "@/app/api/invites/[token]/accept/route";
 import { getDb, schema } from "@/server/db/client";
@@ -234,13 +235,14 @@ describe("Google login (002 US1)", () => {
       expect(setCookieLine(res.headers, "ms_gsignup")).toMatch(/Max-Age=0/);
 
       const [u] = await users();
-      expect(u).toMatchObject({ username: null, passwordHash: null, googleSub: "google-sub-1", googleEmail: "an@gmail.com" });
+      expect(u).toMatchObject({ username: null, passwordHash: null, googleSub: "google-sub-1", email: "an@gmail.com" });
+      expect(u.emailVerifiedAt).toBeInstanceOf(Date); // 005: Google verified it
       expect(u.inviteToken.length).toBeGreaterThanOrEqual(24);
       expect(await pending()).toHaveLength(0);
 
       const who = await call(me, "GET", "/api/me", { cookie: sessionFrom(res.headers) });
       expect(who.status).toBe(200);
-      expect(who.body).toMatchObject({ username: null, googleEmail: "an@gmail.com" });
+      expect(who.body).toMatchObject({ username: null, email: "an@gmail.com" });
       expect(who.body.user.displayName).toBe("Bé An");
 
       // The same cookie cannot be used twice
@@ -293,12 +295,13 @@ describe("Google login (002 US1)", () => {
       expect(await pending()).toHaveLength(0);
     });
 
-    it("keeps the stored Google e-mail up to date", async () => {
+    it("never overwrites the account's verified e-mail with a new Google e-mail (005 research R8)", async () => {
       await submitName(signupCookie((await finishCallback(await startFlow())).headers), "An");
       google.claims = googleClaims({ email: "an.moi@gmail.com" });
-      await finishCallback(await startFlow());
+      const res = await finishCallback(await startFlow());
+      expect(locationOf(res.headers)).toBe("/camera");
       const [u] = await getDb().select().from(schema.users).where(eq(schema.users.googleSub, "google-sub-1"));
-      expect(u.googleEmail).toBe("an.moi@gmail.com");
+      expect(u.email).toBe("an@gmail.com");
     });
   });
 
@@ -360,6 +363,71 @@ describe("Google login (002 US1)", () => {
       const flow = await startFlow("/add/abc123");
       const res = await finishCallback(flow, `error=access_denied&state=${flow.state}`);
       expect(locationOf(res.headers)).toBe("/login?error=google_cancelled&next=%2Fadd%2Fabc123");
+    });
+  });
+
+  // 005 US2 — research R8; spec FR-E09, FR-E10, SC-002, SC-003
+  describe("matching an account by its verified e-mail (005 US2)", () => {
+    const login = (username: string, password = "matkhau123") =>
+      call(loginRoute, "POST", "/api/auth/login", { body: { username, password } });
+
+    it("signs into the password account with the same verified e-mail and links Google to it", async () => {
+      const an = await createUser("an_nguyen", "An", "an@gmail.com");
+      google.claims = googleClaims({ email: "An@Gmail.com" });
+      const res = await finishCallback(await startFlow("/add/abc123"));
+      expect(res.status).toBe(302);
+      expect(locationOf(res.headers)).toBe("/add/abc123"); // no name step, invite kept
+      expect(setCookieValue(res.headers, "ms_gsignup")).toBeUndefined();
+      const who = await call(me, "GET", "/api/me", { cookie: sessionFrom(res.headers) });
+      expect(who.body.user.id).toBe(an.id);
+      expect(who.body).toMatchObject({ username: "an_nguyen", email: "an@gmail.com" });
+      const [u] = await users();
+      expect(u.googleSub).toBe("google-sub-1");
+      expect(await users()).toHaveLength(1);
+      // both ways work afterwards
+      expect((await login("an_nguyen")).status).toBe(200);
+      const again = await finishCallback(await startFlow());
+      expect(locationOf(again.headers)).toBe("/camera");
+    });
+
+    it("refuses when that e-mail's account is already linked to another Google account", async () => {
+      await createUser("an_nguyen", "An", "an@gmail.com");
+      await getDb().update(schema.users).set({ googleSub: "other-google-sub" });
+      const res = await finishCallback(await startFlow());
+      expect(locationOf(res.headers)).toBe("/login?error=google_conflict");
+      expect(setCookieValue(res.headers, "ms_session")).toBeUndefined();
+      const [u] = await users();
+      expect(u.googleSub).toBe("other-google-sub");
+      expect(await pending()).toHaveLength(0);
+    });
+
+    it("never links through an e-mail Google has not verified", async () => {
+      await createUser("an_nguyen", "An", "an@gmail.com");
+      google.claims = googleClaims({ email_verified: false });
+      const res = await finishCallback(await startFlow());
+      expect(locationOf(res.headers)).toBe("/login?error=google_unverified");
+      const [u] = await users();
+      expect(u.googleSub).toBeNull();
+    });
+
+    it("an account without an e-mail is never matched (not even by a look-alike username)", async () => {
+      await createUser("an_gmail", "An"); // no e-mail
+      const res = await finishCallback(await startFlow());
+      expect(locationOf(res.headers)).toBe("/login/google");
+      const [u] = await getDb().select().from(schema.users).where(eq(schema.users.username, "an_gmail"));
+      expect(u.googleSub).toBeNull();
+    });
+
+    it("the name step answers 409 if the Google e-mail was verified by another account meanwhile", async () => {
+      const cookie = signupCookie((await finishCallback(await startFlow())).headers);
+      await createUser("nguoi_khac", "Khác", "an@gmail.com");
+      const res = await submitName(cookie, "An");
+      expect(res.status).toBe(409);
+      expect(res.body.error.code).toBe("CONFLICT");
+      expect(await users()).toHaveLength(1);
+      // pressing Google again now matches the e-mail
+      const again = await finishCallback(await startFlow());
+      expect(locationOf(again.headers)).toBe("/camera");
     });
   });
 });

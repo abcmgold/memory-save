@@ -2,6 +2,7 @@ import { Avatar, Sticker } from "@/components/ui/primitives";
 import { FriendsPanel } from "@/components/friends/FriendsPanel";
 import { InviteLinkCard } from "@/components/friends/InviteLinkCard";
 import { LogoutButton } from "@/components/profile/LogoutButton";
+import { EmailCard } from "@/components/profile/EmailCard";
 import { toUserRef } from "@/server/services/auth";
 import { requestOrigin, requirePageUser } from "@/server/services/page-data";
 import { friendsOverview } from "@/server/services/friends";
@@ -35,6 +36,7 @@ export default async function ProfilePage() {
             <p className="truncate text-sm font-semibold text-muted">@{me.handle}</p>
           </div>
         </section>
+        <EmailCard email={user.email} />
         <InviteLinkCard initialUrl={inviteUrl(origin, token)} handle={user.handle} />
         <FriendsPanel initial={overview} />
       </main>

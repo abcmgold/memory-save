@@ -7,6 +7,8 @@ export class ApiError extends Error {
     public code: string,
     message: string,
     public fields?: Record<string, string>,
+    public attemptsLeft?: number,
+    public retryAfter?: number,
   ) {
     super(message);
   }
@@ -29,7 +31,7 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   const data = await res.json().catch(() => null);
   if (!res.ok) {
     const e = data?.error;
-    throw new ApiError(res.status, e?.code ?? "INTERNAL", e?.message ?? msg.internal, e?.fields);
+    throw new ApiError(res.status, e?.code ?? "INTERNAL", e?.message ?? msg.internal, e?.fields, e?.attemptsLeft, e?.retryAfter);
   }
   return data as T;
 }

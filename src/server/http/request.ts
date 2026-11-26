@@ -22,6 +22,12 @@ export function checkOrigin(req: Request): void {
   if (originHost !== requestHost(req)) throw errors.badOrigin();
 }
 
+/** Client IP for rate limits: first x-forwarded-for hop (Vercel overwrites this header), else "unknown" (005 R3). */
+export function clientIp(req: Request): string {
+  const first = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return first && first.length <= 64 ? first : "unknown";
+}
+
 export function isHttps(req: Request): boolean {
   const proto = req.headers.get("x-forwarded-proto");
   if (proto) return proto.split(",")[0].trim() === "https";

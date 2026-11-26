@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClass } from "@/components/ui/Button";
 import { FormError, TextField } from "@/components/ui/Field";
 import { api, ApiError } from "@/lib/api-client";
 import { MAX_DISPLAY_NAME } from "@/lib/messages";
@@ -13,6 +13,7 @@ export function GoogleSignupForm({ suggestedName, next }: { suggestedName: strin
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>();
+  const [taken, setTaken] = useState(false); // 005: the Google e-mail now belongs to another account
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,6 +29,11 @@ export function GoogleSignupForm({ suggestedName, next }: { suggestedName: strin
       if (err instanceof ApiError && err.status === 410) {
         router.replace("/login?error=google_expired");
         return;
+      }
+      if (err instanceof ApiError && err.status === 409) {
+        setTaken(true);
+        setError(err.message);
+        return; // the pending sign-up is gone; only "Tiếp tục với Google" again helps
       }
       if (err instanceof ApiError) {
         setFieldError(err.fields?.displayName);
@@ -52,9 +58,15 @@ export function GoogleSignupForm({ suggestedName, next }: { suggestedName: strin
         error={fieldError}
       />
       <FormError message={error} />
-      <Button type="submit" size="lg" className="mt-1.5" disabled={busy}>
-        {busy ? "Đang tạo tài khoản…" : "Bắt đầu"}
-      </Button>
+      {taken ? (
+        <a href={`/login${next ? `?next=${encodeURIComponent(next)}` : ""}`} className={buttonClass("primary", "lg", "mt-1.5")}>
+          Quay lại đăng nhập
+        </a>
+      ) : (
+        <Button type="submit" size="lg" className="mt-1.5" disabled={busy}>
+          {busy ? "Đang tạo tài khoản…" : "Bắt đầu"}
+        </Button>
+      )}
     </form>
   );
 }

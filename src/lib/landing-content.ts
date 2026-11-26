@@ -42,7 +42,7 @@ export const FEATURES: { icon: FeatureIcon; tone: Tone; title: string; body: str
 ];
 
 export const STEPS: { title: string; body: string }[] = [
-  { title: "Tạo tài khoản", body: "Bằng Google hoặc tên đăng nhập — chưa tới một phút." },
+  { title: "Tạo tài khoản", body: "Bằng Google, hoặc tên đăng nhập kèm email — chưa tới hai phút." },
   { title: "Gửi link kết bạn", body: "Mỗi người có một link riêng; người thân bấm vào là thành bạn." },
   { title: "Lưu và chia sẻ", body: "Viết, chụp, rồi chọn ai được xem từng khoảnh khắc." },
 ];
@@ -62,6 +62,10 @@ export const FAQ: { question: string; answer: string }[] = [
     question: "Có cần cài ứng dụng không?",
     answer:
       "Không. MemorySave chạy trên trình duyệt của điện thoại và máy tính; chọn “Thêm vào màn hình chính” để mở như một ứng dụng.",
+  },
+  {
+    question: "Quên mật khẩu thì sao?",
+    answer: "Bấm “Quên mật khẩu?” ở trang đăng nhập, nhận mã qua email đã xác thực rồi đặt mật khẩu mới.",
   },
   {
     question: "Kết bạn với người thân thế nào?",

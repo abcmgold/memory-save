@@ -32,7 +32,9 @@ export const users = pgTable(
     displayName: text("display_name").notNull(), // required since rev 3.1 (FR-001)
     passwordHash: text("password_hash"), // null for Google accounts (002)
     googleSub: text("google_sub").unique(), // 002 data-model.md › users.google_sub — Google's stable account id
-    googleEmail: text("google_email"), // 002 data-model.md › users.google_email — shown to its owner only
+    // 005 data-model.md › users.email — verified e-mail only, normalized, unique; shown to its owner only (FR-E15)
+    email: text("email").unique(),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }), // 005 data-model.md › users.email_verified_at
     lastAudience: jsonb("last_audience")
       .$type<LastAudience>()
       .notNull()
@@ -40,12 +42,13 @@ export const users = pgTable(
     createdAt: createdAt(),
   },
   (t) => [
-    // 002: exactly one way to sign in — username + password, or Google
+    // 005: at least one way to sign in; a username always comes with a password (both may coexist with Google)
     check(
-      "users_one_login_method",
-      sql`(${t.username} IS NOT NULL AND ${t.passwordHash} IS NOT NULL AND ${t.googleSub} IS NULL) OR (${t.googleSub} IS NOT NULL AND ${t.username} IS NULL AND ${t.passwordHash} IS NULL)`,
+      "users_login_method",
+      sql`(${t.username} IS NULL) = (${t.passwordHash} IS NULL) AND (${t.username} IS NOT NULL OR ${t.googleSub} IS NOT NULL)`,
     ),
-    check("users_google_email_length", sql`${t.googleEmail} IS NULL OR char_length(${t.googleEmail}) <= 320`),
+    check("users_email_verified", sql`(${t.email} IS NULL) = (${t.emailVerifiedAt} IS NULL)`),
+    check("users_email_length", sql`${t.email} IS NULL OR char_length(${t.email}) <= 254`),
     check("users_username_format", sql`${t.username} ~ '^[a-z0-9_]{3,30}$'`),
     // String.raw keeps the backslashes so Postgres sees "\." (a literal dot), not "." (any character).
     check("users_handle_format", sql.raw(String.raw`"handle" ~ '^[a-z0-9]+(\.[a-z0-9]+)*\.[0-9]{4,6}$' AND char_length("handle") <= 32`)),
@@ -80,6 +83,48 @@ export const pendingGoogleSignups = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("pending_google_signups_expires_idx").on(t.expiresAt)],
+);
+
+export type CodePurpose = "signup" | "change_email" | "reset_password";
+export type CodeDelivery = "code" | "email_taken" | "google_account" | "none";
+export type SignupPayload = { username: string; passwordHash: string; displayName: string; next: string | null };
+
+// 005 data-model.md › email_codes — one pending e-mail code; only hashes are stored (research R2)
+export const emailCodes = pgTable(
+  "email_codes",
+  {
+    ticketHash: text("ticket_hash").primaryKey(),
+    purpose: text("purpose").$type<CodePurpose>().notNull(),
+    email: text("email").notNull(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    codeHash: text("code_hash").notNull(),
+    delivery: text("delivery").$type<CodeDelivery>().notNull(),
+    payload: jsonb("payload").$type<SignupPayload>(),
+    attempts: integer("attempts").notNull().default(0),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("email_codes_purpose", sql`${t.purpose} IN ('signup', 'change_email', 'reset_password')`),
+    check("email_codes_delivery", sql`${t.delivery} IN ('code', 'email_taken', 'google_account', 'none')`),
+    check("email_codes_attempts", sql`${t.attempts} BETWEEN 0 AND 5`),
+    check("email_codes_email_length", sql`char_length(${t.email}) <= 254`),
+    index("email_codes_lookup_idx").on(t.purpose, t.email),
+    index("email_codes_expires_idx").on(t.expiresAt),
+  ],
+);
+
+// 005 data-model.md › email_sends — send log for the per-e-mail / per-IP hourly limits (FR-E03)
+export const emailSends = pgTable(
+  "email_sends",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    email: text("email").notNull(),
+    ip: text("ip").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("email_sends_email_idx").on(t.email, t.sentAt), index("email_sends_ip_idx").on(t.ip, t.sentAt)],
 );
 
 // data-model.md › login_attempts
@@ -204,5 +249,6 @@ export const entryAudience = pgTable(
 
 export type UserRow = typeof users.$inferSelect;
 export type PendingGoogleSignupRow = typeof pendingGoogleSignups.$inferSelect;
+export type EmailCodeRow = typeof emailCodes.$inferSelect;
 export type EntryRow = typeof entries.$inferSelect;
 export type PhotoRow = typeof photos.$inferSelect;

@@ -1,4 +1,7 @@
-import { useId } from "react";
+"use client";
+
+import { useId, useState } from "react";
+import { EyeIcon, EyeOffIcon } from "./icons";
 
 const inputBase =
   "w-full rounded-xl border-2 border-ink bg-white px-3.5 text-base text-ink outline-none focus-visible:shadow-brutal";
@@ -26,6 +29,54 @@ export function TextField({
         className={`${inputBase} h-12 ${inputClassName}`}
         {...rest}
       />
+      {hint && !error && <p className="text-xs font-medium text-muted">{hint}</p>}
+      {error && (
+        <p id={`${id}-err`} role="alert" className="text-sm font-semibold text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** A password input with a show/hide toggle (the toggle never submits the form). */
+export function PasswordField({
+  label,
+  error,
+  hint,
+  className = "",
+  ...rest
+}: Common & Omit<React.InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const id = useId();
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className={`flex min-w-0 flex-col gap-1.5 ${className}`}>
+      <label htmlFor={id} className="text-sm font-extrabold">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          aria-invalid={!!error || undefined}
+          aria-describedby={error ? `${id}-err` : undefined}
+          className={`${inputBase} h-12 pr-12`}
+          {...rest}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+          aria-pressed={visible}
+          aria-controls={id}
+          className="absolute inset-y-0 right-1 my-auto flex h-10 w-10 items-center justify-center rounded-lg text-ink hover:bg-cream"
+        >
+          {visible ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+        </button>
+      </div>
       {hint && !error && <p className="text-xs font-medium text-muted">{hint}</p>}
       {error && (
         <p id={`${id}-err`} role="alert" className="text-sm font-semibold text-danger">

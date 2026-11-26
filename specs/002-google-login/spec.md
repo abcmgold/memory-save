@@ -4,7 +4,8 @@
 
 **Created**: 2026-11-25
 
-**Status**: Draft (rev 3 — trang Cá nhân `/me` không hiển thị cách đăng nhập; rev 2 — bỏ liên kết tài khoản cũ; người mới xác nhận tên hiển thị trước khi tạo tài khoản)
+**Status**: Draft — rev 2 ("không liên kết tài khoản") và rev 3 ("/me không hiển thị email") đã được thay bởi
+[005-email-verification](../005-email-verification/spec.md) (2026-11-26). (rev 3 — trang Cá nhân `/me` không hiển thị cách đăng nhập; rev 2 — bỏ liên kết tài khoản cũ; người mới xác nhận tên hiển thị trước khi tạo tài khoản)
 
 **Input**: User description: "Thêm tính năng đăng nhập bằng Google cho MemorySave. Người dùng có thể đăng
 nhập/đăng ký bằng tài khoản Google bên cạnh cách đăng nhập bằng tên đăng nhập + mật khẩu hiện có. Luồng mời kết

@@ -12,6 +12,9 @@ export type ErrorCode =
   | "RULE"
   | "RATE_LIMITED"
   | "GONE"
+  | "CODE_INVALID"
+  | "MAIL_UNAVAILABLE"
+  | "MAIL_FAILED"
   | "INTERNAL";
 
 export const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
@@ -21,6 +24,9 @@ export const MAX_TITLE = 200;
 export const MAX_BODY = 20_000;
 export const MAX_CAPTION = 200;
 export const MAX_DISPLAY_NAME = 50;
+export const MIN_PASSWORD = 8;
+export const MAX_PASSWORD = 200;
+export const MAX_EMAIL = 254;
 export const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"] as const;
 
 export const msg = {
@@ -35,7 +41,10 @@ export const msg = {
   // auth
   usernameFormat: "Tên đăng nhập gồm 3–30 ký tự: chữ thường không dấu, số hoặc dấu gạch dưới.",
   usernameTaken: "Tên đăng nhập này đã có người dùng.",
-  passwordTooShort: "Mật khẩu cần tối thiểu 8 ký tự.",
+  passwordTooShort: `Mật khẩu cần tối thiểu ${MIN_PASSWORD} ký tự.`,
+  passwordMismatch: "Mật khẩu nhập lại không khớp.",
+  usernameRequired: "Tên đăng nhập không được để trống.",
+  passwordRequired: "Mật khẩu không được để trống.",
   passwordTooLong: "Mật khẩu quá dài.",
   displayNameRequired: "Hãy nhập tên hiển thị — đây là tên bạn bè sẽ thấy.",
   displayNameTooLong: `Tên hiển thị tối đa ${MAX_DISPLAY_NAME} ký tự.`,
@@ -48,6 +57,23 @@ export const msg = {
   googleFailed: "Không đăng nhập được bằng Google. Vui lòng thử lại.",
   googleUnverified: "Email Google này chưa được xác minh nên không dùng để đăng nhập được.",
   googleExpired: "Phiên đăng ký bằng Google đã hết hạn. Vui lòng thử lại.",
+  googleConflict: "Email này đã gắn với một tài khoản Google khác. Hãy đăng nhập bằng tên đăng nhập và mật khẩu.",
+  googleEmailTaken: "Email Google này vừa được dùng cho một tài khoản khác. Hãy bấm “Tiếp tục với Google” lần nữa.",
+
+  // e-mail codes (005)
+  emailRequired: "Email không được để trống.",
+  emailInvalid: "Email chưa đúng định dạng.",
+  emailSameAsCurrent: "Đây là email hiện tại của bạn.",
+  emailUnavailable: "Email này không dùng được. Hãy chọn email khác.",
+  emailTakenOnSignup: "Tên đăng nhập hoặc email vừa được người khác dùng. Vui lòng thử lại.",
+  codeFormat: "Mã gồm 6 chữ số.",
+  codeInvalid: (left: number) => `Mã không đúng. Bạn còn ${left} lần thử.`,
+  codeExpired: "Mã đã hết hiệu lực. Hãy gửi mã mới.",
+  codeWait: (seconds: number) => `Vui lòng đợi ${seconds} giây rồi gửi lại.`,
+  tooManyCodes: "Bạn đã yêu cầu quá nhiều mã. Hãy thử lại sau ít phút.",
+  mailUnavailable: "Tính năng gửi mã tạm thời chưa dùng được. Vui lòng thử lại sau.",
+  mailFailed: "Chưa gửi được mã. Vui lòng thử lại.",
+  emailCardWarning: "Bạn chưa có email. Thêm email để đăng nhập bằng Google và lấy lại mật khẩu khi quên.",
 
   // entries
   titleTooLong: `Tiêu đề tối đa ${MAX_TITLE} ký tự.`,
@@ -80,6 +106,7 @@ export const GOOGLE_LOGIN_ERRORS = {
   google_failed: msg.googleFailed,
   google_unverified: msg.googleUnverified,
   google_expired: msg.googleExpired,
+  google_conflict: msg.googleConflict,
 } as const;
 export type GoogleLoginError = keyof typeof GOOGLE_LOGIN_ERRORS;
 

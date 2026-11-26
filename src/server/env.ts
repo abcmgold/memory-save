@@ -63,6 +63,24 @@ export function getGoogleConfig(): { clientId: string; clientSecret: string } | 
   return clientId && clientSecret ? { clientId, clientSecret } : null;
 }
 
+/** 005 research R1 — Gmail SMTP credentials, or null when not configured. Reads process.env directly; never throws. */
+export function getMailConfig(): { user: string; pass: string; fromName: string } | null {
+  const user = process.env.SMTP_USER?.trim();
+  const pass = process.env.SMTP_PASS?.replace(/\s+/g, ""); // App Passwords are often pasted as "abcd efgh ijkl mnop"
+  if (!user || !pass) return null;
+  return { user, pass, fromName: process.env.MAIL_FROM_NAME?.trim() || "MemorySave" };
+}
+
+/**
+ * How mails leave the app: "log" in tests and local mode (codes printed to the terminal; MAIL_TRANSPORT=smtp opts a
+ * local run into real sending), "smtp" when configured, null when production has no mail settings (FR-E16).
+ */
+export function mailTransport(): "smtp" | "log" | null {
+  if (process.env.NODE_ENV === "test") return "log";
+  if (isLocalMode() && process.env.MAIL_TRANSPORT !== "smtp") return "log";
+  return getMailConfig() ? "smtp" : null;
+}
+
 /** Time zone is needed by pure domain code and tests; it never throws. */
 export function getAppTimeZone(): string {
   return process.env.APP_TIMEZONE || "Asia/Ho_Chi_Minh";
