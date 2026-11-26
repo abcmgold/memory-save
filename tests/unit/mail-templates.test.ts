@@ -23,8 +23,14 @@ describe("codeMail", () => {
     expect(codeMail("reset_password", "111111").text).toMatch(/mật khẩu/);
   });
 
-  it("escapes nothing it should not — html stays plain", () => {
-    expect(codeMail("signup", "111111").html).not.toMatch(/<script/i);
+  it("is a full branded HTML mail, not just text (no scripts, images or links)", () => {
+    const { html } = codeMail("signup", "042137");
+    expect(html).toMatch(/^<!doctype html>/);
+    expect(html).toContain('lang="vi"');
+    expect(html).toContain("MemorySave");
+    expect(html).toContain("Chào mừng bạn đến MemorySave");
+    expect(html).toMatch(/Mã của bạn: 042137/); // inbox preview line
+    expect(html).not.toMatch(/<script|<img|<a\s/i);
   });
 });
 
