@@ -1,16 +1,40 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/server/http/auth";
 import { AppError } from "@/server/http/errors";
-import { lookupInvite } from "@/server/services/invites";
+import type { Metadata } from "next";
+import { inviterNameByToken, lookupInvite } from "@/server/services/invites";
+import {
+  INVITE_FALLBACK_DESCRIPTION,
+  INVITE_FALLBACK_TITLE,
+  inviteShareDescription,
+  inviteShareTitle,
+  OPEN_GRAPH_DEFAULTS,
+} from "@/lib/share-text";
 import { buttonClass } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/primitives";
 import { UsersIcon } from "@/components/ui/icons";
 import { msg } from "@/lib/messages";
+import { HOME_PATH } from "@/lib/routes";
 import { AcceptInvite } from "./AcceptInvite";
 import { GoogleButton } from "@/components/ui/GoogleButton";
 import { getGoogleConfig } from "@/server/env";
 
-export const metadata = { title: "Lời mời kết bạn · MemorySave", robots: { index: false } };
+const NOINDEX = { index: false, follow: false };
+
+/** Share card for the link (003 FR-S07–S09): the inviter's display name only; unknown token → generic card. */
+export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
+  const { token } = await params;
+  const inviter = await inviterNameByToken(token);
+  const title = inviter ? inviteShareTitle(inviter.displayName) : INVITE_FALLBACK_TITLE;
+  const description = inviter ? inviteShareDescription(inviter.displayName) : INVITE_FALLBACK_DESCRIPTION;
+  return {
+    title,
+    description,
+    robots: NOINDEX,
+    openGraph: { ...OPEN_GRAPH_DEFAULTS, title, description, url: `/add/${encodeURIComponent(token)}` },
+    twitter: { title, description },
+  };
+}
 
 /** Landing page for a friend-invite link (FR-040, FR-041). Viewing never changes anything by itself. */
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
@@ -32,7 +56,7 @@ export default async function InvitePage({ params }: { params: Promise<{ token: 
       {!invite ? (
         <div className="mt-12 flex flex-col items-center gap-5">
           <p className="text-lg font-bold">{msg.inviteInvalid}</p>
-          <Link href={viewer ? "/" : "/login"} className={buttonClass("primary", "md")}>
+          <Link href={viewer ? HOME_PATH : "/login"} className={buttonClass("primary", "md")}>
             {viewer ? "Về trang chính" : "Đăng nhập"}
           </Link>
         </div>

@@ -5,6 +5,7 @@ import { buttonClass } from "@/components/ui/Button";
 import { TimelineList } from "@/components/journal/TimelineList";
 import { listShared } from "@/server/services/moments";
 import { localNow, requirePageUser } from "@/server/services/page-data";
+import { HOME_PATH } from "@/lib/routes";
 
 export const metadata = { title: "Khoảnh khắc · MemorySave" };
 
@@ -19,7 +20,7 @@ export default async function MomentsPage() {
           <p className="text-sm font-medium text-muted">Bạn bè chia sẻ với bạn</p>
         </div>
         <Link
-          href="/"
+          href={HOME_PATH}
           aria-label="Đăng nhanh"
           className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-ink bg-peach shadow-brutal"
         >

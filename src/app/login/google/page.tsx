@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/server/http/auth";
 import { getPendingSignup, SIGNUP_COOKIE } from "@/server/services/google-login";
 import { BookIcon, GoogleIcon, LockIcon } from "@/components/ui/icons";
 import { GoogleSignupForm } from "./GoogleSignupForm";
+import { HOME_PATH } from "@/lib/routes";
 
 export const metadata = { title: "Chọn tên hiển thị · MemorySave", robots: { index: false } };
 
@@ -12,7 +13,7 @@ export const metadata = { title: "Chọn tên hiển thị · MemorySave", robot
 export default async function GoogleSignupPage() {
   const store = await cookies();
   const pending = await getPendingSignup(store.get(SIGNUP_COOKIE)?.value);
-  if (await getCurrentUser()) redirect(pending?.next ?? "/");
+  if (await getCurrentUser()) redirect(pending?.next ?? HOME_PATH);
   if (!pending) redirect("/login?error=google_expired");
 
   return (

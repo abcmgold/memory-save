@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError, TextField } from "@/components/ui/Field";
 import { GoogleButton, OrDivider } from "@/components/ui/GoogleButton";
 import { api, ApiError } from "@/lib/api-client";
+import { HOME_PATH } from "@/lib/routes";
 
 type Mode = "login" | "register";
 
@@ -40,7 +41,7 @@ export function LoginForm({
           ...(mode === "register" ? { displayName: String(form.get("displayName") ?? "") } : {}),
         },
       });
-      router.replace(next ?? "/");
+      router.replace(next ?? HOME_PATH);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {

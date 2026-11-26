@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/Button";
 import { CheckIcon } from "@/components/ui/icons";
 import { api, ApiError } from "@/lib/api-client";
+import { HOME_PATH } from "@/lib/routes";
 
 /**
  * Runs in the visitor's own signed-in browser, so a messaging app's link preview (no session, no JS)
@@ -53,7 +54,7 @@ export function AcceptInvite({ token, name }: { token: string; name: string }) {
       <Link href="/moments" className={buttonClass("primary", "lg", "w-full")}>
         Xem khoảnh khắc
       </Link>
-      <Link href="/" className={buttonClass("secondary", "lg", "w-full")}>
+      <Link href={HOME_PATH} className={buttonClass("secondary", "lg", "w-full")}>
         Chụp & chia sẻ ngay
       </Link>
     </div>

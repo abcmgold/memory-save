@@ -137,6 +137,14 @@ Mở tên miền trên **điện thoại** (có HTTPS nên camera dùng được
 - [ ] Tab Cá nhân → sao chép link kết bạn → mở ở tài khoản kia → tự thành bạn
 - [ ] Đăng bài "Tất cả bạn bè" → tài khoản kia thấy trong tab Khoảnh khắc
 - [ ] Vercel → Settings → **Cron Jobs** → bấm **Run** cho `/api/cron/cleanup` → trả về 200
+- [ ] Cửa sổ ẩn danh mở `https://<tên-miền>/` → trang giới thiệu; đã đăng nhập mở `/` → vào thẳng `/camera`
+- [ ] https://pagespeed.web.dev cho `/` → SEO 100, Accessibility ≥ 95; https://search.google.com/test/rich-results cho
+  `/` → nhận diện `WebApplication`; Google Search Console → gửi `https://<tên-miền>/sitemap.xml`
+- [ ] Cửa sổ ẩn danh mở `https://<tên-miền>/me` → chuyển ngay sang `/login?next=%2Fme` (mã 307, không chớp trang trống)
+- [ ] `https://<tên-miền>/robots.txt` và `/manifest.webmanifest` mở được
+- [ ] Dán link kết bạn vào https://developers.facebook.com/tools/debug (hoặc gửi thử qua Zalo/Messenger) → thẻ xem trước
+  có "<tên> mời bạn kết bạn trên MemorySave" và ảnh. Facebook/Zalo lưu tạm thẻ cũ: bấm **Scrape Again** nếu vừa deploy
+- [ ] Điện thoại: "Thêm vào màn hình chính" → icon cuốn sổ nền cam, tên MemorySave
 - [ ] Mở thẳng một URL ảnh `https://<account>.r2.cloudflarestorage.com/memorysave-photos/...` → bị từ chối (bucket private)
 
 ---

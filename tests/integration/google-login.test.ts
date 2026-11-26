@@ -285,7 +285,7 @@ describe("Google login (002 US1)", () => {
       const created = await submitName(cookie, "An");
       const res = await finishCallback(await startFlow());
       expect(res.status).toBe(302);
-      expect(locationOf(res.headers)).toBe("/");
+      expect(locationOf(res.headers)).toBe("/camera");
       expect(setCookieValue(res.headers, "ms_gsignup")).toBeUndefined();
       const who = await call(me, "GET", "/api/me", { cookie: sessionFrom(res.headers) });
       expect(who.body.user.id).toBe(created.body.user.id);
@@ -346,13 +346,13 @@ describe("Google login (002 US1)", () => {
     });
 
     it.each(["//evil.com", "https://evil.com/x", "/\\evil.com", "javascript:alert(1)"])(
-      "drops an unsafe next %j and lands on /",
+      "drops an unsafe next %j and lands on /camera",
       async (next) => {
         const flow = await startFlow(next);
         const created = await submitName(signupCookie((await finishCallback(flow)).headers), "An");
         expect(created.body.next).toBeNull();
         const again = await finishCallback(await startFlow(next));
-        expect(locationOf(again.headers)).toBe("/");
+        expect(locationOf(again.headers)).toBe("/camera");
       },
     );
 

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookIcon, CameraIcon, MomentsIcon, PenIcon, UserIcon } from "./icons";
+import { HOME_PATH } from "@/lib/routes";
 
 const items = [
   { href: "/journal", label: "Nhật ký", Icon: BookIcon, match: (p: string) => p.startsWith("/journal") && p !== "/journal/new" },
   { href: "/moments", label: "Khoảnh khắc", Icon: MomentsIcon, match: (p: string) => p.startsWith("/moments") },
-  { href: "/", label: "Chụp", Icon: CameraIcon, match: (p: string) => p === "/" },
+  { href: HOME_PATH, label: "Chụp", Icon: CameraIcon, match: (p: string) => p.startsWith(HOME_PATH) },
   { href: "/journal/new", label: "Viết", Icon: PenIcon, match: (p: string) => p === "/journal/new" },
   { href: "/me", label: "Cá nhân", Icon: UserIcon, match: (p: string) => p.startsWith("/me") },
 ];

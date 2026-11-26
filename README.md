@@ -7,6 +7,9 @@ Nhật ký hằng ngày và chia sẻ khoảnh khắc với bạn bè: viết nh
 - Thiết kế giao diện: https://claude.ai/artifact/R54gKMFCQv1fsT3R8xAz9o
 - Nguyên tắc dự án: [`.specify/memory/constitution.md`](.specify/memory/constitution.md)
 
+**Trang**: `/` giới thiệu công khai · `/login` đăng nhập/đăng ký · `/camera` Chụp (trang chính trong app) · `/journal`
+Nhật ký · `/moments` Khoảnh khắc · `/me` Cá nhân · `/add/<token>` link kết bạn. Route luôn đặt bằng tiếng Anh.
+
 **Công nghệ**: Next.js 16 (App Router) · PostgreSQL (Neon) + Drizzle · Cloudflare R2 (ảnh) · Tailwind CSS v4 · Vitest.
 
 ## Chạy thử ngay, không cần tài khoản (chế độ local)

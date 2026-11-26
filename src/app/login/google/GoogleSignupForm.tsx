@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { FormError, TextField } from "@/components/ui/Field";
 import { api, ApiError } from "@/lib/api-client";
 import { MAX_DISPLAY_NAME } from "@/lib/messages";
+import { HOME_PATH } from "@/lib/routes";
 
 export function GoogleSignupForm({ suggestedName, next }: { suggestedName: string; next: string | null }) {
   const router = useRouter();
@@ -21,7 +22,7 @@ export function GoogleSignupForm({ suggestedName, next }: { suggestedName: strin
     setFieldError(undefined);
     try {
       const res = await api<{ next: string | null }>("/api/auth/google/complete", { body: { displayName } });
-      router.replace(res.next ?? next ?? "/");
+      router.replace(res.next ?? next ?? HOME_PATH);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError && err.status === 410) {

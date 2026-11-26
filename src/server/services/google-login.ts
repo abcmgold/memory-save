@@ -12,6 +12,7 @@ import { insertUser, pgError, toUserRef } from "./auth";
 import { createSession, sessionCookie } from "./sessions";
 import { msg, type GoogleLoginError } from "@/lib/messages";
 import { safeNext } from "@/lib/safe-next";
+import { HOME_PATH } from "@/lib/routes";
 import type { UserRef } from "@/lib/types";
 
 // 002-google-login — research R3 (ms_oauth), R4 (pending sign-up), R5 (races), R9 (errors); contracts/api.md
@@ -135,7 +136,7 @@ export async function handleCallback(req: Request): Promise<RedirectResult> {
     }
     const session = await createSession(existing.id);
     cookies.push(sessionCookie(session.token, session.expiresAt, secure));
-    return { location: next ?? "/", cookies };
+    return { location: next ?? HOME_PATH, cookies };
   }
 
   // New person: Google is sure who they are, the account waits for a confirmed display name (FR-G03).

@@ -1,4 +1,5 @@
 // Card, Sticker, Section label, Chip and Avatar — neo-brutalism primitives from the design.
+import { avatarToneIndex } from "@/lib/share-text";
 
 export function Card({
   className = "",
@@ -76,12 +77,11 @@ export function Chip({
   );
 }
 
+// Order must match the hex palette used for share images (src/server/og/card.tsx).
 const AVATAR_TONES = ["bg-sky", "bg-pink", "bg-mint", "bg-butter", "bg-lavender", "bg-peach"];
 
 export function avatarTone(seed: string): string {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  return AVATAR_TONES[h % AVATAR_TONES.length];
+  return AVATAR_TONES[avatarToneIndex(seed)];
 }
 
 export function Avatar({

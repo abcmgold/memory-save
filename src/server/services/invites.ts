@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "../db/client";
 import { errors } from "../http/errors";
@@ -44,6 +45,15 @@ export async function rotateInviteToken(userId: string): Promise<string> {
   await getDb().update(schema.users).set({ inviteToken: token }).where(eq(schema.users.id, userId));
   return token;
 }
+
+/**
+ * Inviter's public name for share cards (003 FR-S07/S09) — display name only. Cached per request so the page,
+ * generateMetadata and the Open Graph image share one lookup. Unknown or malformed token → null (FR-S08).
+ */
+export const inviterNameByToken = cache(async (token: string): Promise<{ id: string; displayName: string } | null> => {
+  const inviter = await inviterByToken(token);
+  return inviter ? { id: inviter.id, displayName: inviter.displayName } : null;
+});
 
 async function inviterByToken(token: string) {
   if (!isTokenShaped(token)) return null;

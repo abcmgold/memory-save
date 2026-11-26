@@ -1,12 +1,21 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/http/auth";
 import { BookIcon, LockIcon } from "@/components/ui/icons";
 import { safeNext } from "@/lib/safe-next";
+import { HOME_PATH } from "@/lib/routes";
 import { googleLoginErrorMessage } from "@/lib/messages";
+import { OPEN_GRAPH_DEFAULTS, SITE_DESCRIPTION, SITE_NAME } from "@/lib/share-text";
 import { getGoogleConfig } from "@/server/env";
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Đăng nhập · MemorySave" };
+export const metadata: Metadata = {
+  title: "Đăng nhập · MemorySave",
+  description:
+    "MemorySave — nhật ký hằng ngày riêng tư: viết, chụp và lưu lại từng khoảnh khắc, chỉ chia sẻ với người thân bạn chọn.",
+  alternates: { canonical: "/login" }, // folds the ?next= / ?error= variants (004 FR-L09)
+  openGraph: { ...OPEN_GRAPH_DEFAULTS, title: SITE_NAME, description: SITE_DESCRIPTION, url: "/login" },
+};
 
 export default async function LoginPage({
   searchParams,
@@ -15,7 +24,7 @@ export default async function LoginPage({
 }) {
   const { next: rawNext, mode, error } = await searchParams;
   const next = safeNext(rawNext);
-  if (await getCurrentUser()) redirect(next ?? "/");
+  if (await getCurrentUser()) redirect(next ?? HOME_PATH);
   return (
     <main className="flex min-h-dvh flex-col px-5 pt-20 pb-9">
       <div className="flex items-center gap-3.5">

@@ -7,10 +7,17 @@ import "@fontsource/be-vietnam-pro/700.css";
 import "@fontsource/be-vietnam-pro/800.css";
 import "@fontsource/be-vietnam-pro/900.css";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
+import { OPEN_GRAPH_DEFAULTS, SITE_DESCRIPTION, SITE_NAME } from "@/lib/share-text";
 
+// 003 contracts/http.md › Thẻ <head>: absolute URLs + default share card for every page
 export const metadata: Metadata = {
-  title: "MemorySave",
-  description: "Ghi lại từng ngày, chia sẻ khoảnh khắc với người thân.",
+  metadataBase: new URL(siteUrl()),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: { ...OPEN_GRAPH_DEFAULTS, title: SITE_NAME, description: SITE_DESCRIPTION },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

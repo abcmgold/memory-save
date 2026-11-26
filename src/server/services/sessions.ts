@@ -2,9 +2,10 @@ import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { and, eq, gt, lt } from "drizzle-orm";
 import { getDb, schema } from "../db/client";
+import { SESSION_COOKIE } from "@/lib/session-cookie";
 
 // data-model.md › sessions ; research.md R4
-export const SESSION_COOKIE = "ms_session";
+export { SESSION_COOKIE };
 const SESSION_DAYS = 30;
 const RENEW_WHEN_DAYS_LEFT = 15;
 const DAY_MS = 86_400_000;
