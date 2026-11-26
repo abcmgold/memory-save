@@ -31,7 +31,7 @@ Body:
 | Kết quả | Mã |
 |---|---|
 | Hợp lệ (kể cả khi email đã có tài khoản — R4) | 202 + phản hồi "đã gửi mã" |
-| Sai định dạng (`fields.username` / `password` / `displayName` / `email`) | 400 VALIDATION |
+| Sai định dạng (`fields.username` / `password` / `displayName` / `email`; email trống → "Email không được để trống.") | 400 VALIDATION |
 | Tên đăng nhập đã có người dùng | 409 CONFLICT (`fields.username`) |
 | Vượt giới hạn email/IP | 429 RATE_LIMITED |
 | Chưa cấu hình mail / gửi lỗi | 503 MAIL_UNAVAILABLE / 502 MAIL_FAILED |

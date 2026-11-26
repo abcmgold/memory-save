@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-26
 
-**Status**: Draft
+**Status**: Implemented (commit `ccba5e7`, 2026-11-26) — bổ sung sau triển khai ở cuối mục Requirements
 
 **Input**: User description: "Tạo tài khoản vẫn có tên đăng nhập, nhưng thêm ô email và xác thực email đó bằng mã OTP
 gửi về hộp thư. Đăng nhập bằng tên đăng nhập hoặc bằng Google đều được: Google trả về email, khớp với email trong hệ
@@ -199,6 +199,15 @@ thực → cảnh báo biến mất; đăng nhập Google bằng email đó → 
 - **FR-E17**: Dữ liệu hiện có MUST giữ nguyên qua thay đổi (Nguyên tắc V): tài khoản Google cũ chuyển email sang dạng đã xác
   thực; tài khoản tên đăng nhập cũ không có email.
 - **FR-E18**: Route tiếng Anh; chữ giao diện và thư tiếng Việt; phong cách giao diện hiện có, dùng tốt từ 360px.
+
+**Bổ sung sau triển khai (yêu cầu 2026-11-26/27)**
+
+- **FR-E19**: Các form (đăng nhập/đăng ký, mã xác thực, quên mật khẩu, email ở /me) MUST kiểm tra dữ liệu ngay trên trình
+  duyệt bằng cùng luật và cùng câu thông báo với máy chủ (`src/lib/validation.ts`); dữ liệu sai thì không gửi yêu cầu.
+  Máy chủ vẫn kiểm tra lại mọi thứ.
+- **FR-E20**: Ô trống MUST báo "… không được để trống" (vd "Email không được để trống."), không báo "sai định dạng".
+- **FR-E21**: Đăng ký và đặt mật khẩu mới MUST có ô "Nhập lại mật khẩu" (không khớp → "Mật khẩu nhập lại không khớp.");
+  mọi ô mật khẩu MUST có nút ẩn/hiện.
 
 ### Key Entities
 

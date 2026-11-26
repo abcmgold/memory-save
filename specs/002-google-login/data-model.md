@@ -5,6 +5,11 @@ Bổ sung cho [001 data-model](../001-daily-journal/data-model.md). Migration: `
 
 ## users (sửa)
 
+> **Đổi ở 005-email-verification** (migration `0004`): cột `google_email` → `email` (+ `email_verified_at`); bỏ
+> `users_one_login_method` và `users_google_email_length`, thay bằng `users_login_method` (có ít nhất một cách đăng nhập;
+> username và mật khẩu đi đôi), `users_email_verified`, `users_email_length` (≤ 254), UNIQUE `users_email_unique`. Xem
+> [005 data-model](../005-email-verification/data-model.md). Bảng dưới là trạng thái sau 0003.
+
 | Cột | Kiểu | Thay đổi | Ghi chú |
 |---|---|---|---|
 | `username` | text, UNIQUE | **bỏ NOT NULL** | null với tài khoản Google; CHECK định dạng cũ giữ nguyên (NULL vẫn qua) |

@@ -239,6 +239,11 @@ và phải đỏ trước khi viết code tương ứng.
 - [ ] T054 (test/typecheck/lint/build ✅ 2026-11-26; còn thử tay local — cần khởi động lại `npm run dev:local` để áp migration 0004) Chạy `npm test`, `npm run typecheck`, `npm run lint`, `npm run build:app`; chạy local theo quickstart.md › Thủ công
   1–4, 6 trên PGlite với `LogMailer`
 
+- [X] T055 (bổ sung, FR-E19–E21) Luật form dùng chung `src/lib/validation.ts` (+ `tests/unit/validation.test.ts`), kiểm tra
+  phía trình duyệt ở `src/app/login/LoginForm.tsx`, `src/components/auth/CodeStep.tsx`,
+  `src/app/forgot-password/ForgotPasswordForm.tsx`, `src/components/profile/EmailCard.tsx`; `PasswordField` có nút ẩn/hiện
+  trong `src/components/ui/Field.tsx`; ô "Nhập lại mật khẩu"; câu báo ô trống
+
 ---
 
 ## Dependencies & Execution Order

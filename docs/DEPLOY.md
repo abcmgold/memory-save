@@ -208,9 +208,14 @@ Nên làm định kỳ (ví dụ mỗi tuần) và trước mỗi thay đổi l�
 | Lần mở đầu tiên chậm vài giây | Neon free tự ngủ khi rảnh — bình thường |
 | Camera không mở | Phải mở qua `https://` (tên miền Vercel), không phải `http://IP` |
 | Cron trả 401 | `CRON_SECRET` trên Vercel khác với lúc deploy — đặt lại rồi redeploy |
+| Đăng ký báo "Tính năng gửi mã tạm thời chưa dùng được" | Thiếu `SMTP_USER`/`SMTP_PASS` (mục 3.2) — thêm rồi **Redeploy** |
+| Báo "Chưa gửi được mã", log có `[mail] send failed: code=EAUTH` | Sai `SMTP_PASS`, hoặc đã đổi mật khẩu Gmail làm Mật khẩu ứng dụng mất hiệu lực — tạo mới |
+| Trang Mật khẩu ứng dụng báo "Cài đặt … không khả dụng" | Chưa bật Xác minh 2 bước, mở nhầm tài khoản (xem `/u/<số>/` trên URL), tài khoản Workspace bị admin chặn, hoặc đang bật Bảo vệ nâng cao — dùng một Gmail cá nhân riêng |
+| Không thấy thư có mã | Xem thư mục Spam/Quảng cáo; mỗi email tối đa 5 mã/giờ |
 
 ## Hạn mức free cần để ý
 
 - **Neon**: dung lượng DB nhỏ (~0,5 GB) — đủ cho hàng trăm nghìn bài chữ; ảnh không nằm ở đây.
 - **R2**: 10 GB ảnh (mỗi ảnh lưu bản gốc + bản hiển thị + thumbnail ≈ 1,3× dung lượng gốc).
 - **Vercel Hobby**: chỉ dùng cá nhân/phi thương mại; cron tối đa 1 lần/ngày.
+- **Gmail SMTP**: khoảng 500 thư/ngày cho một tài khoản Gmail thường.

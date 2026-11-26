@@ -1,7 +1,8 @@
 # MemorySave
 
 Nhật ký hằng ngày và chia sẻ khoảnh khắc với bạn bè: viết nhật ký kèm ảnh, xem lại theo timeline,
-đăng nhanh bằng camera, kết bạn bằng tên đăng nhập và chọn ai được xem từng bài.
+đăng nhanh bằng camera, kết bạn bằng mã định danh hoặc link và chọn ai được xem từng bài. Đăng ký bằng tên đăng nhập kèm
+email xác thực (mã 6 số), hoặc bằng Google; quên mật khẩu thì lấy lại qua email.
 
 - Spec, plan, API: [`specs/001-daily-journal/`](specs/001-daily-journal/) · Đăng nhập Google: [`specs/002-google-login/`](specs/002-google-login/)
   · Email xác thực + quên mật khẩu: [`specs/005-email-verification/`](specs/005-email-verification/)
@@ -63,6 +64,9 @@ npm run typecheck && npm run lint
 3. **Vercel**: import repo, thêm biến môi trường `DATABASE_URL`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
    `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `APP_TIMEZONE=Asia/Ho_Chi_Minh`, `CRON_SECRET` (chuỗi ngẫu nhiên ≥ 16 ký tự).
    Lệnh build mặc định `npm run build` sẽ chạy migration rồi `next build`. Cron dọn dẹp hằng ngày khai báo trong `vercel.json`.
+   Thêm `SMTP_USER` + `SMTP_PASS` (Gmail + Mật khẩu ứng dụng) để gửi mã xác thực — thiếu thì đăng ký bằng tên đăng nhập,
+   thêm email và quên mật khẩu báo "chưa dùng được" ([`docs/DEPLOY.md`](docs/DEPLOY.md) mục 3.2). Tuỳ chọn:
+   `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` cho đăng nhập Google (mục 3.1).
 4. Mở `https://<tên-app>.vercel.app` trên điện thoại — HTTPS có sẵn nên camera dùng được.
 
 Chạy local với Neon/R2 thật: `cp .env.example .env.local`, điền giá trị (nên dùng một Neon branch `dev`), rồi

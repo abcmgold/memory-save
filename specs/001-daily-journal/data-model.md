@@ -8,6 +8,10 @@ Quyết định nền tảng: xem [research.md](./research.md) R3, R5–R8, R10.
 
 > **Mở rộng ở 002-google-login**: `username`/`password_hash` có thể null (tài khoản Google), thêm `google_sub`,
 > `google_email` và bảng `pending_google_signups` — xem [002 data-model](../002-google-login/data-model.md).
+>
+> **Mở rộng ở 005-email-verification**: `google_email` đổi thành `email` (chỉ email đã xác thực, duy nhất) + `email_verified_at`;
+> một tài khoản có thể vừa có mật khẩu vừa có Google; thêm bảng `email_codes`, `email_sends` — xem
+> [005 data-model](../005-email-verification/data-model.md).
 
 | Cột | Kiểu | Ràng buộc / ghi chú |
 |---|---|---|

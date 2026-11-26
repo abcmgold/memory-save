@@ -10,6 +10,7 @@ Dữ liệu được đọc (chỉ đọc):
 | 001 › users | `display_name` | tiêu đề + ảnh xem trước link mời | 1–50 ký tự (đã có); là dữ liệu duy nhất được đưa vào thẻ (FR-S09) |
 | 001 › users | `id` | màu avatar trong ảnh (cùng thuật toán `avatarTone(seed)`) | không hiển thị ra ngoài |
 
-Không bao giờ đọc vào thẻ/ảnh: `username`, `google_email`, `google_sub`, `password_hash`, token khác.
+Không bao giờ đọc vào thẻ/ảnh: `username`, `email` (trước 005 là `google_email`), `email_verified_at`, `google_sub`,
+`password_hash`, token khác.
 
 Trạng thái tạm: cookie `ms_session` chỉ được kiểm tra **có/không** ở proxy (research R2), không giải mã, không tra DB.

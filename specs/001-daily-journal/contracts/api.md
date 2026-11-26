@@ -40,6 +40,10 @@ type Page<T> = { items: T[]; nextCursor: string | null };
 
 ## Xác thực
 
+> **Đổi ở 005-email-verification**: `POST /api/auth/register` đã bị xoá. Đăng ký giờ gồm 2 bước
+> `POST /api/auth/register/start` (thêm `email`) → `POST /api/auth/register/verify` (mã 6 số gửi qua email); `GET /api/me`
+> trả thêm `email`. Xem [005 contracts](../005-email-verification/contracts/api.md).
+
 | Method & path | Body | Thành công |
 |---|---|---|
 | `POST /api/auth/register` | `{ username, password, displayName }` — `displayName` bắt buộc, 1–50 ký tự | `201 { user: UserRef }` + Set-Cookie |

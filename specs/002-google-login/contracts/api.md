@@ -52,6 +52,10 @@ Mã lỗi mới: `GONE` (410). Client khi gặp `410` → chuyển về `/login?
 
 ## Thay đổi endpoint cũ
 
+> **Đổi ở 005-email-verification**: `googleEmail` trong `GET /api/me` đổi thành `email`; callback thêm bước khớp tài
+> khoản theo email đã xác thực và lỗi `/login?error=google_conflict`; `complete` có thêm `409 CONFLICT`. Xem
+> [005 contracts](../005-email-verification/contracts/api.md).
+
 - `GET /api/me`: thêm `googleEmail: string | null` (chỉ chính chủ); `username` có thể là `null`.
 - `POST /api/auth/login`: tài khoản Google (không có username) không bao giờ khớp → `401 INVALID_CREDENTIALS` như
   thường (FR-G11).
