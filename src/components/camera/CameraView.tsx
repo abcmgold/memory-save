@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CameraIcon, FlashIcon, ImageIcon, SwitchIcon } from "@/components/ui/icons";
-import { chromeIntentUrl, detectInAppBrowser, IN_APP_LABEL, isAndroid, type InAppBrowser } from "@/lib/in-app-browser";
+import { detectInAppBrowser, externalBrowserUrl, IN_APP_LABEL, type InAppBrowser } from "@/lib/in-app-browser";
 
 type Facing = "environment" | "user";
 // "inapp": a chat/social app's built-in browser (Zalo…) — its web view forces the live preview into a full-screen
@@ -265,12 +265,13 @@ function FallbackButton({ onClick, label = "Chụp / chọn ảnh từ máy" }: 
 
 function InAppNotice({ app, onCamera }: { app: InAppBrowser | null; onCamera: () => void }) {
   const [copied, setCopied] = useState(false);
-  const android = typeof navigator !== "undefined" && isAndroid(navigator.userAgent);
+  const [outside] = useState(() =>
+    typeof window === "undefined" ? null : externalBrowserUrl(window.location.href, navigator.userAgent),
+  );
   const where = app ? `trình duyệt của ${IN_APP_LABEL[app]}` : "trình duyệt này";
 
-  function openInChrome() {
-    const url = chromeIntentUrl(window.location.href);
-    if (url) window.location.href = url;
+  function openOutside() {
+    if (outside) window.location.href = outside;
   }
 
   async function copyLink() {
@@ -286,9 +287,9 @@ function InAppNotice({ app, onCamera }: { app: InAppBrowser | null; onCamera: ()
     <>
       <p>Camera trong {where} không chụp được ngay trên trang. Hãy chụp bằng camera của máy, hoặc mở trang bằng trình duyệt.</p>
       <FallbackButton onClick={onCamera} label="Chụp bằng camera của máy" />
-      {android ? (
-        <button type="button" onClick={openInChrome} className="text-[13px] font-bold text-white underline underline-offset-2">
-          Mở bằng Chrome
+      {outside ? (
+        <button type="button" onClick={openOutside} className="text-[13px] font-bold text-white underline underline-offset-2">
+          Mở bằng trình duyệt
         </button>
       ) : (
         <>

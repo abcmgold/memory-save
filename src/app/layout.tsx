@@ -9,6 +9,7 @@ import "@fontsource/be-vietnam-pro/900.css";
 import "./globals.css";
 import { siteUrl } from "@/lib/site";
 import { OPEN_GRAPH_DEFAULTS, SITE_DESCRIPTION, SITE_NAME } from "@/lib/share-text";
+import { InAppBrowserGate } from "@/components/InAppBrowserGate";
 
 // 003 contracts/http.md › Thẻ <head>: absolute URLs + default share card for every page
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" className="h-full antialiased">
       <body className="min-h-full">
         <div className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col">{children}</div>
+        <InAppBrowserGate />
       </body>
     </html>
   );
