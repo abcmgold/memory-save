@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CameraIcon, FlashIcon, ImageIcon, SwitchIcon } from "@/components/ui/icons";
+import { chromeIntentUrl, detectInAppBrowser, IN_APP_LABEL, isAndroid, type InAppBrowser } from "@/lib/in-app-browser";
 
 type Facing = "environment" | "user";
-type CamError = "denied" | "unavailable" | null;
+// "inapp": a chat/social app's built-in browser (Zalo…) — its web view forces the live preview into a full-screen
+// player, so the phone's own camera app is used instead.
+type CamError = "denied" | "unavailable" | "inapp" | null;
 
 // research.md R12 — in-app camera via getUserMedia, with a device picker fallback (FR-018, FR-019, FR-021)
 export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) {
@@ -18,9 +21,21 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
   const [torchSupported, setTorchSupported] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [inApp, setInApp] = useState<InAppBrowser | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    const app = detectInAppBrowser(navigator.userAgent);
+    if (app) {
+      queueMicrotask(() => {
+        if (cancelled) return;
+        setInApp(app);
+        setError("inapp");
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
       queueMicrotask(() => !cancelled && setError("unavailable"));
       return () => {
@@ -61,6 +76,33 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
       streamRef.current = null;
     };
   }, [facing]);
+
+  // Safety net for web views we don't recognise: if the preview is pulled into a full-screen player, stop the camera
+  // and fall back to the phone's camera app instead of leaving the user stuck in a "live stream" screen.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const bail = () => {
+      try {
+        (video as HTMLVideoElement & { webkitExitFullscreen?: () => void }).webkitExitFullscreen?.();
+      } catch {}
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      setReady(false);
+      setError("inapp");
+    };
+    const onFullscreen = () => {
+      if (document.fullscreenElement !== video) return;
+      document.exitFullscreen?.().catch(() => {});
+      bail();
+    };
+    video.addEventListener("webkitbeginfullscreen", bail);
+    document.addEventListener("fullscreenchange", onFullscreen);
+    return () => {
+      video.removeEventListener("webkitbeginfullscreen", bail);
+      document.removeEventListener("fullscreenchange", onFullscreen);
+    };
+  }, []);
 
   const toggleTorch = useCallback(async () => {
     const track = streamRef.current?.getVideoTracks()[0];
@@ -110,6 +152,8 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
           <video
             ref={videoRef}
             playsInline
+            disablePictureInPicture
+            controls={false}
             muted
             aria-label="Khung xem camera"
             className={`absolute inset-0 h-full w-full object-cover ${facing === "user" ? "-scale-x-100" : ""} ${ready ? "" : "invisible"}`}
@@ -129,6 +173,7 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
                   <FallbackButton onClick={() => fallbackRef.current?.click()} />
                 </>
               )}
+              {error === "inapp" && <InAppNotice app={inApp} onCamera={() => fallbackRef.current?.click()} />}
               {!error && <p>Đang mở camera…</p>}
             </div>
           )}
@@ -206,14 +251,53 @@ export function CameraView({ onCapture }: { onCapture: (photo: Blob) => void }) 
   );
 }
 
-function FallbackButton({ onClick }: { onClick: () => void }) {
+function FallbackButton({ onClick, label = "Chụp / chọn ảnh từ máy" }: { onClick: () => void; label?: string }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className="mt-1 h-11 rounded-xl border-2 border-ink bg-butter px-4 text-sm font-extrabold text-ink shadow-brutal"
     >
-      Chụp / chọn ảnh từ máy
+      {label}
     </button>
+  );
+}
+
+function InAppNotice({ app, onCamera }: { app: InAppBrowser | null; onCamera: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const android = typeof navigator !== "undefined" && isAndroid(navigator.userAgent);
+  const where = app ? `trình duyệt của ${IN_APP_LABEL[app]}` : "trình duyệt này";
+
+  function openInChrome() {
+    const url = chromeIntentUrl(window.location.href);
+    if (url) window.location.href = url;
+  }
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <>
+      <p>Camera trong {where} không chụp được ngay trên trang. Hãy chụp bằng camera của máy, hoặc mở trang bằng trình duyệt.</p>
+      <FallbackButton onClick={onCamera} label="Chụp bằng camera của máy" />
+      {android ? (
+        <button type="button" onClick={openInChrome} className="text-[13px] font-bold text-white underline underline-offset-2">
+          Mở bằng Chrome
+        </button>
+      ) : (
+        <>
+          <p className="text-[12.5px]">Hoặc bấm ⋯ ở góc trên → “Mở bằng trình duyệt”.</p>
+          <button type="button" onClick={copyLink} className="text-[13px] font-bold text-white underline underline-offset-2">
+            {copied ? "Đã sao chép link" : "Sao chép link"}
+          </button>
+        </>
+      )}
+    </>
   );
 }
